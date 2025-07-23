@@ -1,22 +1,22 @@
+// src/components/common/ProjectCard.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
-
-interface Project {
-  title: string;
-  description: string;
-  technologies: string[];
-  liveUrl?: string;
-  repoUrl?: string;
-  imageUrl: string;
-}
+import { Project } from '../../types';
 
 const ProjectCard = ({ project }: { project: Project }) => {
+    
+    // Animation variants for each card
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { y: 0, opacity: 1 }
+    };
+
     return (
         <motion.div 
+            variants={itemVariants} // Use the item variants here
             className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-lg flex flex-col h-full"
             whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' }}
-            transition={{ duration: 0.3 }}
         >
             <img src={project.imageUrl} alt={project.title} className="w-full h-56 object-cover" />
             <div className="p-6 flex flex-col flex-grow">

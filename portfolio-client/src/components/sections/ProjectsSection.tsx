@@ -1,17 +1,10 @@
+// src/components/sections/ProjectsSection.tsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import AnimatedSection from '../common/AnimatedSection';
 import ProjectCard from '../common/ProjectCard';
-
-interface Project {
-  _id: string;
-  title: string;
-  description: string;
-  technologies: string[];
-  liveUrl?: string;
-  repoUrl?: string;
-  imageUrl: string;
-}
+import { Project } from '../../types';
 
 const ProjectsSection = () => {
     const [projects, setProjects] = useState<Project[]>([]);
@@ -20,7 +13,6 @@ const ProjectsSection = () => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                // IMPORTANT: Make sure your backend API is running on localhost:5000
                 const { data } = await axios.get('http://localhost:5000/api/projects');
                 setProjects(data);
             } catch (error) {
@@ -32,17 +24,34 @@ const ProjectsSection = () => {
         fetchProjects();
     }, []);
 
+    // Animation variants for the container
+    const containerVariants = {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.2, // This tells each child to animate 0.2s after the previous one
+        },
+      },
+    };
+
     return (
         <AnimatedSection id="projects" className="py-20 px-4">
             <h2 className="text-4xl font-bold text-center mb-12">My Work & Projects</h2>
             {loading ? (
                 <p className="text-center">Loading Projects...</p>
             ) : (
-                <div className="container mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <motion.div
+                  className="container mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                  variants={containerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.1 }}
+                >
                     {projects.map((project) => (
                         <ProjectCard key={project._id} project={project} />
                     ))}
-                </div>
+                </motion.div>
             )}
         </AnimatedSection>
     );

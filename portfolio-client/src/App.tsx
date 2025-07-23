@@ -1,9 +1,8 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
-import React from 'react';
-// Stubs for future pages
+import AdminLoginPage from './pages/admin/AdminLoginPage';
 // import BlogPage from './pages/BlogPage';
-// import AdminLoginPage from './pages/AdminLoginPage';
 
 function App() {
   return (
@@ -11,7 +10,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         {/* <Route path="/blog" element={<BlogPage />} /> */}
-        {/* <Route path="/admin" element={<AdminLoginPage />} /> */}
+        <Route path="/login" element={<AdminLoginPage />} />
       </Routes>
     </Router>
   );
