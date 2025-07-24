@@ -62,8 +62,8 @@ const importData = async () => {
         await Project.insertMany(projectsData);
         
         await User.create({
-            email: 'your-email@example.com', // Change this to your real email for login
-            password: 'yoursecurepassword'   // Change this to a secure password
+            email: 'vrushabhshirke21@gmail.com', // Change this to your real email for login
+            password: 'Deepak@03 '   // Change this to a secure password
         });
 
         console.log('Data Imported Successfully!');

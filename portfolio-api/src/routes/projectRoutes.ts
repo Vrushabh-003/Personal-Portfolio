@@ -1,12 +1,13 @@
 // src/routes/projectRoutes.ts
 import { Router } from 'express';
-import { getProjects, createProject, updateProject, deleteProject } from '../controllers/projectController';
+import { getProjects, getProjectById, createProject, updateProject, deleteProject } from '../controllers/projectController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Public route
+// Public routes
 router.route('/').get(getProjects);
+router.route('/:id').get(getProjectById); // <-- This is the new route
 
 // Protected admin routes
 router.route('/').post(protect, createProject);

@@ -47,6 +47,7 @@ const ProjectsSection = () => {
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.1 }}
+                  style={{ perspective: "1000px" }}
                 >
                     {projects.map((project) => (
                         <ProjectCard key={project._id} project={project} />

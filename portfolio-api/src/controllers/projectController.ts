@@ -14,6 +14,22 @@ export const getProjects = async (req: Request, res: Response) => {
   }
 };
 
+// @desc    Get a single project by ID
+// @route   GET /api/projects/:id
+// @access  Public
+export const getProjectById = async (req: Request, res: Response) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (project) {
+      res.json(project);
+    } else {
+      res.status(404).json({ message: 'Project not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 // @desc    Create a project
 // @route   POST /api/projects
 // @access  Private (Admin)
@@ -24,6 +40,7 @@ export const createProject = async (req: Request, res: Response) => {
     const createdProject = await project.save();
     res.status(201).json(createdProject);
   } catch (error) {
+    console.error('ERROR in createProject:', error) // Added for better logging
     res.status(500).json({ message: 'Server Error' });
   }
 };

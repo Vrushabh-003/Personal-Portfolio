@@ -7,6 +7,9 @@ import connectDB from './config/db';
 // Import route files
 import projectRoutes from './routes/projectRoutes'; 
 import authRoutes from './routes/authRoutes';
+import blogRoutes from './routes/blogRoutes'; // Placeholder for blog routes
+import achievementRoutes from './routes/achievementRoutes'; 
+import contactRoutes from './routes/contactRoutes'; 
 // Add imports for blogRoutes and achievementRoutes when you create them
 
 dotenv.config();
@@ -25,8 +28,9 @@ app.get('/api', (req, res) => {
 // Use routes
 app.use('/api/projects', projectRoutes);
 app.use('/api/auth', authRoutes);
-// app.use('/api/blogs', blogRoutes);
-// app.use('/api/achievements', achievementRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/achievements', achievementRoutes);
+app.use('/api/contact', contactRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
