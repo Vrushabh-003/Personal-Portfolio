@@ -48,24 +48,26 @@ To run this project locally, follow these steps:
 
 ### 1. Backend Setup (`portfolio-api`)
 ```bash
-# Navigate to the backend folder
-cd portfolio-api
+  # Navigate to the backend folder
+  cd portfolio-api
+  
+  # Install dependencies
+  npm install
+  
+  # Create a .env file and add your MONGO_URI and JWT_SECRET
+  
+  # Run the seeder script to populate the database
+  # (Remember to set your admin credentials in src/seeder.ts first)
+  npm run seed
+  
+  # Start the backend server
+  npm run dev
+  
+  The API will be running on http://localhost:5000.
+```
 
-# Install dependencies
-npm install
-
-# Create a .env file and add your MONGO_URI and JWT_SECRET
-
-# Run the seeder script to populate the database
-# (Remember to set your admin credentials in src/seeder.ts first)
-npm run seed
-
-# Start the backend server
-npm run dev
-
-The API will be running on http://localhost:5000.
-
-2. Frontend Setup (portfolio-client)
+### 2. Frontend Setup (portfolio-client)
+```bash
 
 # Open a new terminal and navigate to the frontend folder
 cd portfolio-client
@@ -77,6 +79,6 @@ npm install
 npm run dev
 
 The application will be running on http://localhost:5173.
-
+```
 Contact
 [Vrushabh Shirke](https://in.linkedin.com/in/vrushabhshirke)
