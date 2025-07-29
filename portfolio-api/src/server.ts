@@ -18,7 +18,10 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+// Use the cors middleware
+app.use(cors({
+  origin: 'https://your-frontend-app.netlify.app' // IMPORTANT: Use your live frontend URL here
+}));
 app.use(express.json());
 
 // Simple welcome route

@@ -6,7 +6,7 @@ import ProjectsSection from '../components/sections/ProjectsSection';
 import Footer from '../components/layout/Footer';
 import { Helmet } from 'react-helmet-async';
 import AboutSection from '../components/sections/AboutSection';
-import SkillsSection from '../components/sections/SkillsSection';
+import SkillsSection from '../components/sections/Skillssection';
 import AchievementsSection from '../components/sections/AchievementsSection';
 import ContactSection from '../components/sections/ContactSection';
 import ExperienceSection from '../components/sections/ExperienceSection';
