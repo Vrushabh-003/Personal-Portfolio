@@ -1,38 +1,29 @@
 // src/components/common/ProjectCard.tsx
 import React, { useRef } from 'react';
-import { motion, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 import { Project } from '../../types';
-import { useTheme } from '../../contexts/ThemeContext'; // 1. Import the useTheme hook
 
-const ProjectCard = ({ project }: { project: Project }) => {
+interface ProjectCardProps {
+  project: Project;
+  onClick: () => void;
+}
+
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
     const cardRef = useRef<HTMLDivElement>(null);
-    const { theme } = useTheme(); // 2. Get the current theme
 
     const x = useMotionValue(0);
     const y = useMotionValue(0);
-
-    const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30, restDelta: 0.001 });
-    const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30, restDelta: 0.001 });
-
+    const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+    const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
     const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["8deg", "-8deg"]);
     const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-8deg", "8deg"]);
-    
-    // 3. Define the glare color based on the current theme
-    const glareColor = theme === 'dark' 
-        ? 'rgba(255, 255, 255, 0.1)' 
-        : 'rgba(0, 123, 255, 0.15)';
-
-    const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["100%", "0%"]);
-    const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["100%", "0%"]);
 
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!cardRef.current) return;
         const { width, height, left, top } = cardRef.current.getBoundingClientRect();
-        const mouseX = e.clientX - left;
-        const mouseY = e.clientY - top;
-        x.set(mouseX / width - 0.5);
-        y.set(mouseY / height - 0.5);
+        x.set((e.clientX - left) / width - 0.5);
+        y.set((e.clientY - top) / height - 0.5);
     };
 
     const handleMouseLeave = () => {
@@ -40,34 +31,16 @@ const ProjectCard = ({ project }: { project: Project }) => {
         y.set(0);
     };
 
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { y: 0, opacity: 1 }
-    };
-
     return (
         <motion.div
             ref={cardRef}
-            variants={itemVariants}
-            className="relative rounded-lg shadow-lg"
+            className="relative rounded-lg shadow-lg cursor-pointer"
             style={{ transformStyle: "preserve-3d", rotateX, rotateY }}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            onClick={onClick}
         >
             <div className="relative bg-white dark:bg-gray-800 rounded-lg flex flex-col h-full overflow-hidden" style={{ transform: "translateZ(20px)" }}>
-                <motion.div 
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                        background: useMotionTemplate`
-                            radial-gradient(
-                                circle at ${glareX} ${glareY},
-                                ${glareColor},
-                                transparent 40%
-                            )
-                        `,
-                        opacity: useTransform(mouseXSpring, [-0.5, 0.5], [0, 1]),
-                    }}
-                />
                 <img src={project.imageUrl} alt={project.title} className="w-full h-56 object-cover" />
                 <div className="p-6 flex flex-col flex-grow">
                     <h3 className="text-2xl font-bold mb-2 text-light-text dark:text-dark-text">{project.title}</h3>

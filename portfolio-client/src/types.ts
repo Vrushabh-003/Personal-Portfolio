@@ -28,3 +28,13 @@ export interface Achievement {
   date: string;
   imageUrl?: string;
 }
+
+export interface Experience {
+  _id: string;
+  title: string;
+  company: string;
+  location: string;
+  startDate: string;
+  endDate?: string;
+  description: string[];
+}

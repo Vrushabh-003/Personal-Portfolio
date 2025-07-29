@@ -6,8 +6,8 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
-  cursor: none;
+* {
+  cursor: none !important;
 }
 
 @keyframes blob {
@@ -45,4 +45,9 @@ body {
 @keyframes infinite-scroll {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
+}
+/* Add this to the bottom of src/styles/index.css */
+
+.custom-cursor-container {
+  filter: url('#gooey');
 }

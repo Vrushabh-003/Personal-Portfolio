@@ -6,8 +6,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState('your-email@example.com'); // Pre-fill for convenience
-  const [password, setPassword] = useState('yoursecurepassword'); // Pre-fill for convenience
+  const [email, setEmail] = useState(''); // Pre-fill for convenience
+  const [password, setPassword] = useState(''); // Pre-fill for convenience
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();

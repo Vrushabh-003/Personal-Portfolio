@@ -8,10 +8,22 @@ const Footer = () => {
         <footer className="bg-gray-100 dark:bg-gray-900 py-8">
             <div className="container mx-auto text-center text-gray-600 dark:text-gray-400">
                 <div className="flex justify-center gap-6 mb-4">
-                    <a href="#" aria-label="GitHub" className="text-2xl hover:text-primary transition-colors">
+                    <a 
+                        href="https://github.com/Vrushabh-003" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        aria-label="GitHub" 
+                        className="text-2xl hover:text-primary transition-colors"
+                    >
                         <FaGithub />
                     </a>
-                    <a href="#" aria-label="LinkedIn" className="text-2xl hover:text-primary transition-colors">
+                    <a 
+                        href="https://in.linkedin.com/in/vrushabhshirke" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        aria-label="LinkedIn" 
+                        className="text-2xl hover:text-primary transition-colors"
+                    >
                         <FaLinkedin />
                     </a>
                     {/* Add other social links here */}

@@ -1,14 +1,20 @@
 // src/components/layout/Header.tsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useActiveSection } from '../../contexts/ActiveSectionContext';
 import { FaSun, FaMoon, FaBars, FaTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '../../assets/logo.svg?react'; 
+import logoSrc from '../../assets/logo.png'; // Import the image source
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { activeSection } = useActiveSection();
+  const location = useLocation(); // Get current location
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -18,16 +24,21 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { href: '/#about', title: 'About' },
-    { href: '/#skills', title: 'Skills' },
-    { href: '/#projects', title: 'Projects' },
-    { href: '/#achievements', title: 'Achievements' },
-    { href: '/blog', title: 'Blog' },
-    { href: '/#contact', title: 'Contact' },
+    { href: '/#about', title: 'About', id: 'about' },
+    { href: '/#experience', title: 'Experience', id: 'experience' }, // <-- Added this link
+    { href: '/#skills', title: 'Skills', id: 'skills' },
+    { href: '/#projects', title: 'Projects', id: 'projects' },
+    { href: '/#achievements', title: 'Achievements', id: 'achievements' },
+    { href: '/blog', title: 'Blog', id: 'blog' },
+    { href: '/#contact', title: 'Contact', id: 'contact' },
   ];
 
-  const renderLink = (link: { href: string, title: string }, onClick?: () => void) => {
-    const className = "hover:text-primary transition-colors py-3 w-full text-center md:py-0 md:w-auto";
+  const renderLink = (link: (typeof navLinks)[0], onClick?: () => void) => {
+    const isActive = activeSection === link.id || location.pathname === link.href;
+    const className = `transition-colors py-3 w-full text-center md:py-0 md:w-auto ${
+      isActive ? 'text-primary font-bold' : 'hover:text-primary'
+    }`;
+    
     if (link.href.startsWith('/#') || link.href.startsWith('#')) {
       return <a key={link.title} href={link.href} onClick={onClick} className={className}>{link.title}</a>;
     }
@@ -52,16 +63,16 @@ const Header = () => {
             animate="animate"
             exit="exit"
           >
-            {/* Expanded Header Content */}
             <div className="container mx-auto flex justify-between items-center">
-              <a href="/#" className="text-2xl font-bold tracking-wider text-primary">VS.</a>
+             <a href="/#" className =" text-2xl font-text-2xl font-bold tracking-wider text-primary mr-4">
+               <img src={logoSrc} alt="Logo" className="h-14 w-auto" />
+              </a>
               <nav className="hidden md:flex items-center gap-6 text-base font-medium">
                 {navLinks.map(link => renderLink(link))}
                 <motion.button onClick={toggleTheme} whileTap={{ scale: 0.9, rotate: 90 }} className="ml-4">
                   {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
                 </motion.button>
               </nav>
-              {/* Mobile Button Area */}
               <div className="md:hidden flex items-center">
                  <motion.button onClick={toggleTheme} whileTap={{ scale: 0.9, rotate: 90 }} className="mr-4">
                    {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
@@ -83,18 +94,21 @@ const Header = () => {
             initial="initial"
             animate="animate"
             exit="exit"
+            whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
           >
-             {/* Shrunk Header Content */}
              <nav className="hidden md:flex items-center gap-6 text-base font-medium">
-                <a href="/#" className="text-2xl font-bold tracking-wider text-primary mr-4">VS.</a>
+                <a href="/#" className =" text-2xl font-bold tracking-wider text-primary mr-4">
+                <img src={logoSrc} alt="Logo" className="h-10 w-auto" />
+                </a>
                 {navLinks.map(link => renderLink(link))}
                 <motion.button onClick={toggleTheme} whileTap={{ scale: 0.9, rotate: 90 }} className="ml-4">
                   {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
                 </motion.button>
               </nav>
-              {/* Shrunk Mobile Button Area */}
               <div className="md:hidden flex items-center">
-                <a href="/#" className="text-2xl font-bold tracking-wider text-primary mr-4">VS.</a>
+                <a href="/#" className="text-2xl font-bold tracking-wider text-primary mr-4">
+                <img src={logoSrc} alt="Logo" className="h-10 w-auto" />
+                </a>
                 <motion.button onClick={toggleTheme} whileTap={{ scale: 0.9, rotate: 90 }} className="mr-4">
                    {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
                  </motion.button>
@@ -105,8 +119,6 @@ const Header = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {/* Mobile menu stays the same, but attached to the main header */}
        <AnimatePresence>
         {isMenuOpen && (
           <motion.div

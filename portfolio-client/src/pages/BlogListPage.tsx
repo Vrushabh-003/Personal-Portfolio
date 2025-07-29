@@ -5,6 +5,7 @@ import { Blog } from '../types';
 import BlogPostCard from '../components/common/BlogPostCard';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
+import { motion } from 'framer-motion';
 
 const BlogListPage = () => {
   const [posts, setPosts] = useState<Blog[]>([]);
@@ -26,13 +27,25 @@ const BlogListPage = () => {
       <Header />
       <main className="py-20 pt-32">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold text-center mb-12">My Blog</h1>
+          <motion.h1 
+            className="text-5xl font-bold text-center mb-12"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            My Blog
+          </motion.h1>
           {posts.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               {posts.map(post => (
                 <BlogPostCard key={post._id} post={post} />
               ))}
-            </div>
+            </motion.div>
           ) : (
             <p className="text-center text-gray-500">No blog posts yet. Check back soon!</p>
           )}
