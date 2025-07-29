@@ -22,7 +22,9 @@ const ProjectsSection = () => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const { data } = await axios.get('http://localhost:5000/api/projects');
+                // Use the environment variable for the API URL
+                const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/projects`;
+                const { data } = await axios.get(apiUrl);
                 setProjects(data);
             } catch (error) {
                 console.error("Error fetching projects:", error);

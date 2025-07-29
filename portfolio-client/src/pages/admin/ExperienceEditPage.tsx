@@ -17,11 +17,14 @@ const ExperienceEditPage = () => {
   const [description, setDescription] = useState('');
 
   const isNew = !id;
+  // Define the base URL from the environment variable
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     if (!isNew) {
       const fetchExperience = async () => {
-        const { data } = await axios.get(`http://localhost:5000/api/experiences/${id}`);
+        // Use the environment variable for the API URL
+        const { data } = await axios.get(`${apiBaseUrl}/api/experiences/${id}`);
         setTitle(data.title);
         setCompany(data.company);
         setLocation(data.location);
@@ -31,7 +34,7 @@ const ExperienceEditPage = () => {
       };
       fetchExperience();
     }
-  }, [id, isNew]);
+  }, [id, isNew, apiBaseUrl]);
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +42,11 @@ const ExperienceEditPage = () => {
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
     try {
       if (isNew) {
-        await axios.post('http://localhost:5000/api/experiences', experienceData, config);
+        // Use the environment variable for the API URL
+        await axios.post(`${apiBaseUrl}/api/experiences`, experienceData, config);
       } else {
-        await axios.put(`http://localhost:5000/api/experiences/${id}`, experienceData, config);
+        // Use the environment variable for the API URL
+        await axios.put(`${apiBaseUrl}/api/experiences/${id}`, experienceData, config);
       }
       navigate('/admin/dashboard');
     } catch (error) {

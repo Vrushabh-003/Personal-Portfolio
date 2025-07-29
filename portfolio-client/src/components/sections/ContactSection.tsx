@@ -27,7 +27,9 @@ const ContactSection = () => {
     const toastId = toast.loading('Sending message...');
 
     try {
-      await axios.post('http://localhost:5000/api/contact', { name, email, message });
+      // Use the environment variable for the API URL
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/contact`;
+      await axios.post(apiUrl, { name, email, message });
       toast.success('Message sent successfully!', { id: toastId });
       setName('');
       setEmail('');

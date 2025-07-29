@@ -6,8 +6,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const AdminLoginPage = () => {
-  const [email, setEmail] = useState(''); // Pre-fill for convenience
-  const [password, setPassword] = useState(''); // Pre-fill for convenience
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -16,12 +16,14 @@ const AdminLoginPage = () => {
     e.preventDefault();
     setError('');
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/login', {
+      // Use the environment variable for the API URL
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`;
+      const { data } = await axios.post(apiUrl, {
         email,
         password,
       });
       login(data.token);
-      navigate('/admin/dashboard'); // Navigate to a future dashboard page
+      navigate('/admin/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'An error occurred');
       console.error(err);
@@ -42,7 +44,6 @@ const AdminLoginPage = () => {
         <form className="mt-8 space-y-6" onSubmit={submitHandler}>
           {error && <div className="p-2 text-center text-sm text-red-700 bg-red-100 rounded-md">{error}</div>}
           <div className="rounded-md shadow-sm">
-            {/* Input fields for email and password remain the same as before */}
             <div>
               <label htmlFor="email-address" className="sr-only">Email address</label>
               <input id="email-address" name="email" type="email" required className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />

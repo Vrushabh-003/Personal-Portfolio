@@ -57,7 +57,7 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
            <motion.img 
             src={item.imageUrl} 
             alt={item.title} 
-            className="w-full h-80 object-cover rounded-lg shadow-lg" // fixed typo in "rouded-lg"
+            className="w-full h-80 object-cover rounded-lg shadow-lg"
             style={{ y }} 
             whileHover={{
               scale: 1.08,
@@ -101,7 +101,9 @@ const AchievementsSection = () => {
 
   useEffect(() => {
     const fetchAchievements = async () => {
-      const { data } = await axios.get('http://localhost:5000/api/achievements');
+      // Use the environment variable for the API URL
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/achievements`;
+      const { data } = await axios.get(apiUrl);
       setAchievements(data);
     };
     fetchAchievements();

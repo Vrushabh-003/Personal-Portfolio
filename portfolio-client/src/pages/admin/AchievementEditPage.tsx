@@ -15,12 +15,13 @@ const AchievementEditPage = () => {
   const [imageUrl, setImageUrl] = useState('');
 
   const isNew = !id;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     if (!isNew) {
       const fetchAchievement = async () => {
         try {
-          const { data } = await axios.get(`http://localhost:5000/api/achievements/${id}`);
+          const { data } = await axios.get(`${apiBaseUrl}/api/achievements/${id}`);
           setTitle(data.title);
           setDescription(data.description);
           setDate(new Date(data.date).toISOString().split('T')[0]); // Format date for input
@@ -31,7 +32,7 @@ const AchievementEditPage = () => {
       };
       fetchAchievement();
     }
-  }, [id, isNew]);
+  }, [id, isNew, apiBaseUrl]);
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +41,9 @@ const AchievementEditPage = () => {
 
     try {
       if (isNew) {
-        await axios.post('http://localhost:5000/api/achievements', achievementData, config);
+        await axios.post(`${apiBaseUrl}/api/achievements`, achievementData, config);
       } else {
-        await axios.put(`http://localhost:5000/api/achievements/${id}`, achievementData, config);
+        await axios.put(`${apiBaseUrl}/api/achievements/${id}`, achievementData, config);
       }
       navigate('/admin/dashboard');
     } catch (error) {

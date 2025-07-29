@@ -15,7 +15,9 @@ const SinglePostPage = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/blogs/slug/${slug}`);
+        // Corrected line: Use the environment variable for the API URL
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/blogs/slug/${slug}`;
+        const { data } = await axios.get(apiUrl);
         setPost(data);
       } catch (error) {
         console.error('Failed to fetch post', error);

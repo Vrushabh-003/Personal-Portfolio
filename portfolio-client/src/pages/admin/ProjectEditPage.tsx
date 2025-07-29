@@ -5,27 +5,27 @@ import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ProjectEditPage = () => {
-  const { id } = useParams(); // Gets the 'id' from the URL, if it exists
-  console.log('ID from URL:', id);
+  const { id } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [technologies, setTechnologies] = useState(''); // Storing as a comma-separated string for easy editing
+  const [technologies, setTechnologies] = useState('');
   const [liveUrl, setLiveUrl] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
 
-  // const isNew = id === 'new';
   const isNew = !id;
+  // Define the base URL from the environment variable
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    // If we are editing an existing project, fetch its data
     if (!isNew) {
       const fetchProject = async () => {
         try {
-          const { data } = await axios.get(`http://localhost:5000/api/projects/${id}`);
+          // Use the environment variable for the API URL
+          const { data } = await axios.get(`${apiBaseUrl}/api/projects/${id}`);
           setTitle(data.title);
           setDescription(data.description);
           setTechnologies(data.technologies.join(', '));
@@ -38,7 +38,7 @@ const ProjectEditPage = () => {
       };
       fetchProject();
     }
-  }, [id, isNew]);
+  }, [id, isNew, apiBaseUrl]);
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,11 +60,11 @@ const ProjectEditPage = () => {
 
     try {
       if (isNew) {
-        // Create new project
-        await axios.post('http://localhost:5000/api/projects', projectData, config);
+        // Use the environment variable for the API URL
+        await axios.post(`${apiBaseUrl}/api/projects`, projectData, config);
       } else {
-        // Update existing project
-        await axios.put(`http://localhost:5000/api/projects/${id}`, projectData, config);
+        // Use the environment variable for the API URL
+        await axios.put(`${apiBaseUrl}/api/projects/${id}`, projectData, config);
       }
       navigate('/admin/dashboard');
     } catch (error) {
@@ -78,22 +78,21 @@ const ProjectEditPage = () => {
       <div className="container mx-auto max-w-2xl">
         <h1 className="text-4xl font-bold mb-8">{isNew ? 'Add New Project' : 'Edit Project'}</h1>
         <form onSubmit={submitHandler} className="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          {/* Form fields are here */}
           <div>
             <label className="block mb-1 font-medium">Title</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           </div>
           <div>
             <label className="block mb-1 font-medium">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded" rows={4}></textarea>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} required className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded" rows={4}></textarea>
           </div>
           <div>
             <label className="block mb-1 font-medium">Technologies (comma-separated)</label>
-            <input type="text" value={technologies} onChange={e => setTechnologies(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
+            <input type="text" value={technologies} onChange={e => setTechnologies(e.target.value)} required className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           </div>
           <div>
             <label className="block mb-1 font-medium">Image URL</label>
-            <input type="text" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
+            <input type="text" value={imageUrl} onChange={e => setImageUrl(e.target.value)} required className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           </div>
           <div>
             <label className="block mb-1 font-medium">Live Demo URL</label>

@@ -14,12 +14,15 @@ const BlogEditPage = () => {
   const [imageUrl, setImageUrl] = useState('');
   const isNew = !id;
 
+  // Define the base URL from the environment variable
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     if (!isNew) {
       const fetchBlog = async () => {
         try {
           const config = { headers: { Authorization: `Bearer ${token}` } };
-          const { data } = await axios.get(`http://localhost:5000/api/blogs/${id}`, config);
+          const { data } = await axios.get(`${apiBaseUrl}/api/blogs/${id}`, config);
           setTitle(data.title);
           setContent(data.content);
           setImageUrl(data.imageUrl || '');
@@ -29,7 +32,7 @@ const BlogEditPage = () => {
       };
       fetchBlog();
     }
-  }, [id, isNew, token]);
+  }, [id, isNew, token, apiBaseUrl]);
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,12 +41,13 @@ const BlogEditPage = () => {
 
     try {
       if (isNew) {
-        await axios.post('http://localhost:5000/api/blogs', blogData, config);
+        await axios.post(`${apiBaseUrl}/api/blogs`, blogData, config);
       } else {
-        await axios.put(`http://localhost:5000/api/blogs/${id}`, blogData, config);
+        await axios.put(`${apiBaseUrl}/api/blogs/${id}`, blogData, config);
       }
       navigate('/admin/dashboard');
     } catch (error) {
+      // In a real app, provide more specific user feedback
       alert('Failed to save blog post');
     }
   };

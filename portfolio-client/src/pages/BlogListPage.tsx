@@ -13,7 +13,9 @@ const BlogListPage = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/blogs');
+        // Change this line
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/blogs`;
+        const { data } = await axios.get(apiUrl);
         setPosts(data);
       } catch (error) {
         console.error('Failed to fetch blog posts', error);
@@ -22,6 +24,8 @@ const BlogListPage = () => {
     fetchPosts();
   }, []);
 
+  // ... rest of the component
+  
   return (
     <div className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text min-h-screen">
       <Header />

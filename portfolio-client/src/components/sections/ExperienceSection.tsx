@@ -20,7 +20,9 @@ const ExperienceSection = () => {
   useEffect(() => {
     const fetchExperiences = async () => {
       try {
-        const { data } = await axios.get('http://localhost:5000/api/experiences');
+        // Use the environment variable for the API URL
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/experiences`;
+        const { data } = await axios.get(apiUrl);
         const sortedData = data.sort((a: Experience, b: Experience) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
         setExperiences(sortedData);
       } catch(e) { console.error("Failed to fetch experiences", e) }
@@ -28,7 +30,6 @@ const ExperienceSection = () => {
     fetchExperiences();
   }, []);
   
-  // This function correctly takes a string and formats it
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 
   if (experiences.length === 0) return null;

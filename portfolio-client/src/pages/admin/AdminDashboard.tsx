@@ -13,13 +13,16 @@ const AdminDashboard = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
 
+  // Define the base URL from the environment variable
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+
   const fetchData = async () => {
     try {
       const [projectsRes, experiencesRes, achievementsRes, blogsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/projects'),
-        axios.get('http://localhost:5000/api/experiences'),
-        axios.get('http://localhost:5000/api/achievements'),
-        axios.get('http://localhost:5000/api/blogs')
+        axios.get(`${apiBaseUrl}/api/projects`),
+        axios.get(`${apiBaseUrl}/api/experiences`),
+        axios.get(`${apiBaseUrl}/api/achievements`),
+        axios.get(`${apiBaseUrl}/api/blogs`)
       ]);
       setProjects(projectsRes.data);
       setExperiences(experiencesRes.data);
@@ -40,11 +43,12 @@ const AdminDashboard = () => {
   };
 
   const createDeleteHandler = (itemType: string, plural: string) => async (id: string) => {
+    // Note: In a real app, you might want a custom confirmation modal instead of window.confirm
     if (window.confirm(`Are you sure you want to delete this ${itemType}?`)) {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
-        await axios.delete(`http://localhost:5000/api/${plural}/${id}`, config);
-        fetchData();
+        await axios.delete(`${apiBaseUrl}/api/${plural}/${id}`, config);
+        fetchData(); // Refetch data to update the list
       } catch (error) {
         console.error(`Failed to delete ${itemType}`, error);
       }
