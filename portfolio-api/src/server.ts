@@ -20,7 +20,7 @@ const app = express();
 
 // Use the cors middleware
 app.use(cors({
-  origin: 'https://your-frontend-app.netlify.app' // IMPORTANT: Use your live frontend URL here
+  origin: 'https://vrushabhshirke.netlify.app' // IMPORTANT: Use your live frontend URL here
 }));
 app.use(express.json());
 
