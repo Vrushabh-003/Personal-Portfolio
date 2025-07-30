@@ -7,6 +7,7 @@ export interface IProject extends Document {
   liveUrl?: string;
   repoUrl?: string;
   imageUrl: string;
+  mediaType: 'image' | 'video';
 }
 
 const ProjectSchema: Schema = new Schema({
@@ -16,6 +17,7 @@ const ProjectSchema: Schema = new Schema({
   liveUrl: { type: String },
   repoUrl: { type: String },
   imageUrl: { type: String },
+  mediaType: { type: String, enum: ['image', 'video'], default: 'image' },
 }, { timestamps: true });
 
 export default mongoose.model<IProject>('Project', ProjectSchema);
