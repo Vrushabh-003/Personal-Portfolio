@@ -15,6 +15,7 @@ const ProjectEditPage = () => {
   const [liveUrl, setLiveUrl] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
 
   const isNew = !id;
   // Define the base URL from the environment variable
@@ -32,6 +33,7 @@ const ProjectEditPage = () => {
           setLiveUrl(data.liveUrl || '');
           setRepoUrl(data.repoUrl || '');
           setImageUrl(data.imageUrl || '');
+          setMediaType(data.mediaType || 'image');
         } catch (error) {
           console.error('Failed to fetch project', error);
         }
@@ -49,6 +51,7 @@ const ProjectEditPage = () => {
       liveUrl,
       repoUrl,
       imageUrl,
+      mediaType,
     };
     
     const config = {
@@ -101,6 +104,14 @@ const ProjectEditPage = () => {
           <div>
             <label className="block mb-1 font-medium">GitHub Repo URL</label>
             <input type="text" value={repoUrl} onChange={e => setRepoUrl(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Media Type</label>
+            <select value={mediaType} onChange={e => setMediaType(e.target.value as 'image' | 'video')} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded">
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
           </div>
 
           <div className="flex gap-4">

@@ -50,7 +50,7 @@ const ExperienceSection = () => {
               transition={{ duration: 0.6 }}
             >
               <div className={`flex items-center md:grid md:grid-cols-2 md:gap-8`}>
-                <div className={`w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg ${index % 2 === 0 ? 'md:col-start-2' : ''}`}>
+                <div className={`w-full ml-12 md:ml-0 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg ${index % 2 === 0 ? 'md:col-start-2' : ''}`}>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                     {formatDate(job.startDate)} - {job.endDate ? formatDate(job.endDate) : 'Present'}
                   </p>

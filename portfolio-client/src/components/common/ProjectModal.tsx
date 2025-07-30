@@ -40,7 +40,20 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
             <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-primary z-10">
               <FaTimes size={24} />
             </button>
-            <img src={project.imageUrl} alt={project.title} className="w-full h-64 object-cover rounded-t-lg" />
+
+            {/* START: UPDATED MEDIA SECTION */}
+            {project.mediaType === 'video' ? (
+              <video 
+                src={project.imageUrl} 
+                controls 
+                autoPlay
+                className="w-full h-64 object-cover rounded-t-lg bg-black" 
+              />
+            ) : (
+              <img src={project.imageUrl} alt={project.title} className="w-full h-64 object-cover rounded-t-lg" />
+            )}
+            {/* END: UPDATED MEDIA SECTION */}
+
             <div className="p-8">
               <h2 className="text-4xl font-bold mb-4">{project.title}</h2>
               <div className="flex flex-wrap gap-2 mb-6">

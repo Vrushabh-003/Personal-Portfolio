@@ -10,6 +10,7 @@ export interface Project {
   liveUrl?: string;
   repoUrl?: string;
   imageUrl: string;
+  mediaType?: 'image' | 'video';
 }
 
 export interface Blog {

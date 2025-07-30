@@ -41,7 +41,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
             onClick={onClick}
         >
             <div className="relative bg-white dark:bg-gray-800 rounded-lg flex flex-col h-full overflow-hidden" style={{ transform: "translateZ(20px)" }}>
-                <img src={project.imageUrl} alt={project.title} className="w-full h-56 object-cover" />
+                {/* START: UPDATED MEDIA SECTION */}
+                {project.mediaType === 'video' ? (
+                  <video
+                    src={project.imageUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-56 object-cover"
+                  />
+                ) : (
+                  <img src={project.imageUrl} alt={project.title} className="w-full h-56 object-cover" />
+                )}
+                {/* END: UPDATED MEDIA SECTION */}
                 <div className="p-6 flex flex-col flex-grow">
                     <h3 className="text-2xl font-bold mb-2 text-light-text dark:text-dark-text">{project.title}</h3>
                     <p className="text-gray-600 dark:text-gray-400 mb-4 flex-grow">{project.description}</p>
