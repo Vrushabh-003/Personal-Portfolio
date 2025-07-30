@@ -34,13 +34,15 @@ export const getProjectById = async (req: Request, res: Response) => {
 // @route   POST /api/projects
 // @access  Private (Admin)
 export const createProject = async (req: Request, res: Response) => {
-  const { title, description, technologies, liveUrl, repoUrl, imageUrl } = req.body;
   try {
-    const project = new Project({ title, description, technologies, liveUrl, repoUrl, imageUrl });
+    const project = new Project(req.body);
     const createdProject = await project.save();
     res.status(201).json(createdProject);
-  } catch (error) {
-    console.error('ERROR in createProject:', error) // Added for better logging
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+    }
+    console.error('ERROR in createProject:', error)
     res.status(500).json({ message: 'Server Error' });
   }
 };
@@ -49,7 +51,7 @@ export const createProject = async (req: Request, res: Response) => {
 // @route   PUT /api/projects/:id
 // @access  Private (Admin)
 export const updateProject = async (req: Request, res: Response) => {
-  const { title, description, technologies, liveUrl, repoUrl, imageUrl } = req.body;
+  const { title, description, technologies, liveUrl, repoUrl, imageUrl, mediaType } = req.body;
   try {
     const project = await Project.findById(req.params.id);
     if (project) {
@@ -59,12 +61,17 @@ export const updateProject = async (req: Request, res: Response) => {
       project.liveUrl = liveUrl;
       project.repoUrl = repoUrl;
       project.imageUrl = imageUrl;
+      project.mediaType = mediaType; 
+
       const updatedProject = await project.save();
       res.json(updatedProject);
     } else {
       res.status(404).json({ message: 'Project not found' });
     }
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'ValidationError') {
+        return res.status(400).json({ message: 'Validation Error', errors: error.errors });
+    }
     res.status(500).json({ message: 'Server Error' });
   }
 };
