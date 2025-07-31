@@ -1,26 +1,21 @@
-// src/routes/blogRoutes.ts
+// portfolio-api/src/routes/blogRoutes.ts
 import { Router } from 'express';
 import { 
     getBlogs,
     getBlogBySlug,
-    getBlogById, // Import new function
+    getBlogById,
     createBlog,
     updateBlog,
     deleteBlog,
+    reorderBlogs // <-- IMPORT ADDED
 } from '../controllers/blogController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Public routes
-router.route('/').get(getBlogs);
+router.route('/reorder').put(protect, reorderBlogs); // <-- ROUTE ADDED
+router.route('/').get(getBlogs).post(protect, createBlog);
 router.route('/slug/:slug').get(getBlogBySlug);
-
-// Protected Admin Routes
-router.route('/').post(protect, createBlog);
-router.route('/:id')
-    .get(protect, getBlogById) // Add this protected GET route
-    .put(protect, updateBlog)
-    .delete(protect, deleteBlog);
+router.route('/:id').get(protect, getBlogById).put(protect, updateBlog).delete(protect, deleteBlog);
 
 export default router;

@@ -1,5 +1,5 @@
 // src/components/common/ProjectModal.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes, FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 import { Project } from '../../types';
@@ -10,6 +10,15 @@ interface ProjectModalProps {
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Reset the slider to the first image whenever a new project is opened
+  useEffect(() => {
+    if (project) {
+      setCurrentIndex(0);
+    }
+  }, [project]);
+
   const backdropVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
@@ -20,6 +29,24 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
     visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 30 } },
     exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.2 } },
   };
+
+  if (!project) return null;
+
+  const goToPrevious = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent modal from closing
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? project.media.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const goToNext = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent modal from closing
+    const isLastSlide = currentIndex === project.media.length - 1;
+    const newIndex = isLastSlide ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const currentMedia = project.media[currentIndex];
 
   return (
     <AnimatePresence>
@@ -35,24 +62,25 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
           <motion.div
             className="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
             variants={modalVariants}
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-primary z-10">
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-primary z-20">
               <FaTimes size={24} />
             </button>
-
-            {/* START: UPDATED MEDIA SECTION */}
-            {project.mediaType === 'video' ? (
-              <video 
-                src={project.imageUrl} 
-                controls 
-                autoPlay
-                className="w-full h-64 object-cover rounded-t-lg bg-black" 
-              />
-            ) : (
-              <img src={project.imageUrl} alt={project.title} className="w-full h-64 object-cover rounded-t-lg" />
-            )}
-            {/* END: UPDATED MEDIA SECTION */}
+            
+            <div className="relative w-full h-64 md:h-80">
+              {project.media.length > 1 && (
+                <>
+                  <button onClick={goToPrevious} className="absolute top-1/2 left-2 z-10 text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transform -translate-y-1/2 transition-colors">❮</button>
+                  <button onClick={goToNext} className="absolute top-1/2 right-2 z-10 text-white bg-black/40 hover:bg-black/60 rounded-full p-2 transform -translate-y-1/2 transition-colors">❯</button>
+                </>
+              )}
+              {currentMedia && currentMedia.type === 'video' ? (
+                <video src={currentMedia.url} controls autoPlay className="w-full h-full object-cover rounded-t-lg bg-black" />
+              ) : (
+                <img src={currentMedia?.url} alt={project.title} className="w-full h-full object-cover rounded-t-lg" />
+              )}
+            </div>
 
             <div className="p-8">
               <h2 className="text-4xl font-bold mb-4">{project.title}</h2>

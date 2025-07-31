@@ -2,6 +2,12 @@
 
 // This file defines the "shape" of the data we get from our API.
 
+export interface Media {
+  url: string;
+  type: 'image' | 'video';
+  _id?: string; // Mongoose might add an _id to subdocuments
+}
+
 export interface Project {
   _id: string;
   title: string;
@@ -9,8 +15,7 @@ export interface Project {
   technologies: string[];
   liveUrl?: string;
   repoUrl?: string;
-  imageUrl: string;
-  mediaType?: 'image' | 'video';
+  media: Media[];
 }
 
 export interface Blog {

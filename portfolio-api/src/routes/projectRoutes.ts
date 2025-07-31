@@ -1,15 +1,26 @@
-// src/routes/projectRoutes.ts
+// portfolio-api/src/routes/projectRoutes.ts
 import { Router } from 'express';
-import { getProjects, getProjectById, createProject, updateProject, deleteProject } from '../controllers/projectController';
+import { 
+    getProjects, 
+    getProjectById, 
+    createProject, 
+    updateProject, 
+    deleteProject,
+    reorderProjects,
+    getAllProjectsForAdmin
+} from '../controllers/projectController';
 import { protect } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Public routes
+// --- Public & Admin GET Routes ---
+// The specific '/all' route must come BEFORE the general '/:id' route.
+router.route('/all').get(protect, getAllProjectsForAdmin); 
 router.route('/').get(getProjects);
-router.route('/:id').get(getProjectById); // <-- This is the new route
+router.route('/:id').get(getProjectById);
 
-// Protected admin routes
+// --- Protected Admin POST/PUT Routes ---
+router.route('/reorder').put(protect, reorderProjects);
 router.route('/').post(protect, createProject);
 router.route('/:id').put(protect, updateProject).delete(protect, deleteProject);
 

@@ -13,45 +13,53 @@ const AdminDashboard = () => {
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
 
-  // Define the base URL from the environment variable
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const fetchData = async () => {
     try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
       const [projectsRes, experiencesRes, achievementsRes, blogsRes] = await Promise.all([
-        axios.get(`${apiBaseUrl}/api/projects`),
-        axios.get(`${apiBaseUrl}/api/experiences`),
-        axios.get(`${apiBaseUrl}/api/achievements`),
-        axios.get(`${apiBaseUrl}/api/blogs`)
+        axios.get(`${apiBaseUrl}/api/projects/all`, config),
+        axios.get(`${apiBaseUrl}/api/experiences`, config),
+        axios.get(`${apiBaseUrl}/api/achievements`, config),
+        axios.get(`${apiBaseUrl}/api/blogs`, config)
       ]);
       setProjects(projectsRes.data);
       setExperiences(experiencesRes.data);
       setAchievements(achievementsRes.data);
       setBlogs(blogsRes.data);
-    } catch (error) {
-      console.error("Failed to fetch data", error);
-    }
+    } catch (error) { console.error("Failed to fetch data", error); }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  useEffect(() => { if (token) { fetchData(); } }, [token]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = () => { logout(); navigate('/login'); };
 
   const createDeleteHandler = (itemType: string, plural: string) => async (id: string) => {
-    // Note: In a real app, you might want a custom confirmation modal instead of window.confirm
     if (window.confirm(`Are you sure you want to delete this ${itemType}?`)) {
       try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
         await axios.delete(`${apiBaseUrl}/api/${plural}/${id}`, config);
-        fetchData(); // Refetch data to update the list
-      } catch (error) {
-        console.error(`Failed to delete ${itemType}`, error);
-      }
+        fetchData();
+      } catch (error) { console.error(`Failed to delete ${itemType}`, error); }
+    }
+  };
+
+  const createReorderHandler = (plural: string, items: any[], setItems: Function) => async (index: number, direction: 'up' | 'down') => {
+    const newItems = [...items];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= newItems.length) return;
+
+    [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
+    setItems(newItems);
+
+    const orderedIds = newItems.map(item => item._id);
+    try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      await axios.put(`${apiBaseUrl}/api/${plural}/reorder`, { orderedIds }, config);
+    } catch (error) {
+      console.error(`Failed to reorder ${plural}`, error);
+      fetchData(); // Revert on error
     }
   };
 
@@ -60,111 +68,73 @@ const AdminDashboard = () => {
   const handleAchievementDelete = createDeleteHandler('achievement', 'achievements');
   const handleBlogDelete = createDeleteHandler('blog post', 'blogs');
 
+  const handleProjectReorder = createReorderHandler('projects', projects, setProjects);
+  const handleExperienceReorder = createReorderHandler('experiences', experiences, setExperiences);
+  const handleAchievementReorder = createReorderHandler('achievements', achievements, setAchievements);
+  const handleBlogReorder = createReorderHandler('blogs', blogs, setBlogs);
+
   return (
     <div className="p-8 bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-white">
       <div className="container mx-auto space-y-8">
         <div className="flex justify-between items-center">
           <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
-            Logout
-          </button>
+          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Logout</button>
         </div>
         
-        {/* Projects Table */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Manage Projects</h2>
-            <Link to="/admin/project/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add New Project</Link>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Actions</th></tr></thead>
-              <tbody>
-                {projects.map((project) => (
-                  <tr key={project._id} className="border-b border-gray-200 dark:border-gray-700">
-                    <td className="p-2 font-medium">{project.title}</td>
-                    <td className="p-2 flex gap-2">
-                      <Link to={`/admin/project/${project._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
-                      <button onClick={() => handleProjectDelete(project._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="flex justify-between items-center mb-4"><h2 className="text-2xl font-bold">Manage Projects</h2><Link to="/admin/project/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add New Project</Link></div>
+          <div className="overflow-x-auto"><table className="w-full text-left">
+            <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Actions</th></tr></thead>
+            <tbody>{projects.map((item, index) => (
+              <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700"><td className="p-2 font-medium">{item.title}</td><td className="p-2 flex items-center gap-2">
+                <button onClick={() => handleProjectReorder(index, 'up')} disabled={index === 0} className="p-1 disabled:opacity-50 text-xl">↑</button>
+                <button onClick={() => handleProjectReorder(index, 'down')} disabled={index === projects.length - 1} className="p-1 disabled:opacity-50 text-xl">↓</button>
+                <Link to={`/admin/project/${item._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
+                <button onClick={() => handleProjectDelete(item._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
+              </td></tr>))}</tbody>
+          </table></div>
         </div>
 
-        {/* Experience Table */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-           <div className="flex justify-between items-center mb-4">
-             <h2 className="text-2xl font-bold">Manage Experience</h2>
-             <Link to="/admin/experience/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add New Experience</Link>
-           </div>
-           <div className="overflow-x-auto">
-             <table className="w-full text-left">
-              <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Company</th><th className="p-2">Actions</th></tr></thead>
-              <tbody>
-                {experiences.map((item) => (
-                  <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700">
-                    <td className="p-2 font-medium">{item.title}</td>
-                    <td className="p-2">{item.company}</td>
-                    <td className="p-2 flex gap-2">
-                       <Link to={`/admin/experience/${item._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
-                       <button onClick={() => handleExperienceDelete(item._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-           </div>
+           <div className="flex justify-between items-center mb-4"><h2 className="text-2xl font-bold">Manage Experience</h2><Link to="/admin/experience/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add New Experience</Link></div>
+           <div className="overflow-x-auto"><table className="w-full text-left">
+            <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Company</th><th className="p-2">Actions</th></tr></thead>
+            <tbody>{experiences.map((item, index) => (
+              <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700"><td className="p-2 font-medium">{item.title}</td><td className="p-2">{item.company}</td><td className="p-2 flex items-center gap-2">
+                <button onClick={() => handleExperienceReorder(index, 'up')} disabled={index === 0} className="p-1 disabled:opacity-50 text-xl">↑</button>
+                <button onClick={() => handleExperienceReorder(index, 'down')} disabled={index === experiences.length - 1} className="p-1 disabled:opacity-50 text-xl">↓</button>
+                <Link to={`/admin/experience/${item._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
+                <button onClick={() => handleExperienceDelete(item._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
+              </td></tr>))}</tbody>
+          </table></div>
         </div>
 
-        {/* Achievements Table */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-           <div className="flex justify-between items-center mb-4">
-             <h2 className="text-2xl font-bold">Manage Achievements</h2>
-             <Link to="/admin/achievement/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add New Achievement</Link>
-           </div>
-           <div className="overflow-x-auto">
-             <table className="w-full text-left">
-              <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Actions</th></tr></thead>
-              <tbody>
-                {achievements.map((item) => (
-                  <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700">
-                    <td className="p-2 font-medium">{item.title}</td>
-                    <td className="p-2 flex gap-2">
-                       <Link to={`/admin/achievement/${item._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
-                       <button onClick={() => handleAchievementDelete(item._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-           </div>
+           <div className="flex justify-between items-center mb-4"><h2 className="text-2xl font-bold">Manage Achievements</h2><Link to="/admin/achievement/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Add New Achievement</Link></div>
+           <div className="overflow-x-auto"><table className="w-full text-left">
+            <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Actions</th></tr></thead>
+            <tbody>{achievements.map((item, index) => (
+              <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700"><td className="p-2 font-medium">{item.title}</td><td className="p-2 flex items-center gap-2">
+                <button onClick={() => handleAchievementReorder(index, 'up')} disabled={index === 0} className="p-1 disabled:opacity-50 text-xl">↑</button>
+                <button onClick={() => handleAchievementReorder(index, 'down')} disabled={index === achievements.length - 1} className="p-1 disabled:opacity-50 text-xl">↓</button>
+                <Link to={`/admin/achievement/${item._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
+                <button onClick={() => handleAchievementDelete(item._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
+              </td></tr>))}</tbody>
+          </table></div>
         </div>
 
-        {/* Blogs Table */}
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-           <div className="flex justify-between items-center mb-4">
-             <h2 className="text-2xl font-bold">Manage Blogs</h2>
-             <Link to="/admin/blog/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Create New Post</Link>
-           </div>
-           <div className="overflow-x-auto">
-             <table className="w-full text-left">
-              <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Actions</th></tr></thead>
-              <tbody>
-                {blogs.map((post) => (
-                  <tr key={post._id} className="border-b border-gray-200 dark:border-gray-700">
-                    <td className="p-2 font-medium">{post.title}</td>
-                    <td className="p-2 flex gap-2">
-                       <Link to={`/admin/blog/${post._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
-                       <button onClick={() => handleBlogDelete(post._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-           </div>
+           <div className="flex justify-between items-center mb-4"><h2 className="text-2xl font-bold">Manage Blogs</h2><Link to="/admin/blog/new" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">Create New Post</Link></div>
+           <div className="overflow-x-auto"><table className="w-full text-left">
+            <thead><tr className="border-b border-gray-300 dark:border-gray-700"><th className="p-2">Title</th><th className="p-2">Actions</th></tr></thead>
+            <tbody>{blogs.map((item, index) => (
+              <tr key={item._id} className="border-b border-gray-200 dark:border-gray-700"><td className="p-2 font-medium">{item.title}</td><td className="p-2 flex items-center gap-2">
+                <button onClick={() => handleBlogReorder(index, 'up')} disabled={index === 0} className="p-1 disabled:opacity-50 text-xl">↑</button>
+                <button onClick={() => handleBlogReorder(index, 'down')} disabled={index === blogs.length - 1} className="p-1 disabled:opacity-50 text-xl">↓</button>
+                <Link to={`/admin/blog/${item._id}`} className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded">Edit</Link>
+                <button onClick={() => handleBlogDelete(item._id)} className="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-1 px-3 rounded">Delete</button>
+              </td></tr>))}</tbody>
+          </table></div>
         </div>
       </div>
     </div>

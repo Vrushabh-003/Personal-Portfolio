@@ -2,15 +2,17 @@
 import { Request, Response } from 'express';
 import Achievement from '../models/Achievement';
 
+// GET all achievements, sorted by displayOrder
 export const getAchievements = async (req: Request, res: Response) => {
     try {
-        const achievements = await Achievement.find().sort({ date: -1 });
+        const achievements = await Achievement.find().sort({ displayOrder: 1 });
         res.json(achievements);
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }
 };
 
+// GET a single achievement by ID
 export const getAchievementById = async (req: Request, res: Response) => {
     try {
         const achievement = await Achievement.findById(req.params.id);
@@ -24,9 +26,14 @@ export const getAchievementById = async (req: Request, res: Response) => {
     }
 };
 
+// CREATE a new achievement, setting initial displayOrder
 export const createAchievement = async (req: Request, res: Response) => {
     try {
-        const newAchievement = new Achievement(req.body);
+        const count = await Achievement.countDocuments();
+        const newAchievement = new Achievement({
+            ...req.body,
+            displayOrder: count
+        });
         const savedAchievement = await newAchievement.save();
         res.status(201).json(savedAchievement);
     } catch (error) {
@@ -34,6 +41,7 @@ export const createAchievement = async (req: Request, res: Response) => {
     }
 };
 
+// UPDATE an achievement
 export const updateAchievement = async (req: Request, res: Response) => {
     try {
         const achievement = await Achievement.findById(req.params.id);
@@ -49,6 +57,7 @@ export const updateAchievement = async (req: Request, res: Response) => {
     }
 };
 
+// DELETE an achievement
 export const deleteAchievement = async (req: Request, res: Response) => {
     try {
         const achievement = await Achievement.findById(req.params.id);
@@ -58,6 +67,23 @@ export const deleteAchievement = async (req: Request, res: Response) => {
         } else {
             res.status(404).json({ message: 'Achievement not found' });
         }
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// REORDER achievements
+export const reorderAchievements = async (req: Request, res: Response) => {
+    const { orderedIds } = req.body;
+    try {
+        const bulkOps = orderedIds.map((id: string, index: number) => ({
+            updateOne: {
+                filter: { _id: id },
+                update: { $set: { displayOrder: index } },
+            },
+        }));
+        await Achievement.bulkWrite(bulkOps);
+        res.status(200).json({ message: 'Achievements reordered successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
     }

@@ -12,6 +12,7 @@ const AchievementSchema: Schema = new Schema({
   description: { type: String, required: true },
   date: { type: Date, required: true },
   imageUrl: { type: String },
+  displayOrder: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export default mongoose.model<IAchievement>('Achievement', AchievementSchema);

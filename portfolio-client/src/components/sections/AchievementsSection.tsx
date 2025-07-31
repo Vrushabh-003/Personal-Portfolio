@@ -42,7 +42,7 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: false, amount: 0.3 }}
     >
       {/* Animated Border Lines */}
       <motion.div className="absolute top-0 left-0 w-full h-px bg-primary" style={{ originX: 0 }} variants={lineVariants} />

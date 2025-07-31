@@ -1,94 +1,81 @@
-// src/controllers/projectController.ts
+// portfolio-api/src/controllers/projectController.ts
 import { Request, Response } from 'express';
 import Project from '../models/Project';
 
-// @desc    Get all projects
-// @route   GET /api/projects
-// @access  Public
+// GET all projects with pagination and sorting by displayOrder
 export const getProjects = async (req: Request, res: Response) => {
+  const limit = parseInt(req.query.limit as string) || 6;
+  const page = parseInt(req.query.page as string) || 1;
   try {
-    const projects = await Project.find().sort({ createdAt: -1 });
-    res.json(projects);
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
+    const count = await Project.countDocuments();
+    const projects = await Project.find()
+      .sort({ displayOrder: 1 })
+      .limit(limit)
+      .skip(limit * (page - 1));
+    res.json({ projects, page, pages: Math.ceil(count / limit) });
+  } catch (error) { res.status(500).json({ message: 'Server Error' }); }
 };
 
-// @desc    Get a single project by ID
-// @route   GET /api/projects/:id
-// @access  Public
+// GET all projects for admin, sorted by displayOrder
+export const getAllProjectsForAdmin = async (req: Request, res: Response) => {
+  try {
+    const projects = await Project.find().sort({ displayOrder: 1 });
+    res.json(projects);
+  } catch (error) { res.status(500).json({ message: 'Server Error' }); }
+};
+
+// GET a single project by ID
 export const getProjectById = async (req: Request, res: Response) => {
   try {
     const project = await Project.findById(req.params.id);
-    if (project) {
-      res.json(project);
-    } else {
-      res.status(404).json({ message: 'Project not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
+    if (project) { res.json(project); } else { res.status(404).json({ message: 'Project not found' }); }
+  } catch (error) { res.status(500).json({ message: 'Server Error' }); }
 };
 
-// @desc    Create a project
-// @route   POST /api/projects
-// @access  Private (Admin)
+// CREATE a project, setting initial displayOrder
 export const createProject = async (req: Request, res: Response) => {
   try {
-    const project = new Project(req.body);
+    const count = await Project.countDocuments();
+    const project = new Project({ ...req.body, displayOrder: count });
     const createdProject = await project.save();
     res.status(201).json(createdProject);
   } catch (error: any) {
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Validation Error', errors: error.errors });
-    }
-    console.error('ERROR in createProject:', error)
+    if (error.name === 'ValidationError') return res.status(400).json({ message: 'Validation Error', errors: error.errors });
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// @desc    Update a project
-// @route   PUT /api/projects/:id
-// @access  Private (Admin)
+// UPDATE a project
 export const updateProject = async (req: Request, res: Response) => {
-  const { title, description, technologies, liveUrl, repoUrl, imageUrl, mediaType } = req.body;
   try {
     const project = await Project.findById(req.params.id);
     if (project) {
-      project.title = title;
-      project.description = description;
-      project.technologies = technologies;
-      project.liveUrl = liveUrl;
-      project.repoUrl = repoUrl;
-      project.imageUrl = imageUrl;
-      project.mediaType = mediaType; 
-
+      Object.assign(project, req.body);
       const updatedProject = await project.save();
       res.json(updatedProject);
-    } else {
-      res.status(404).json({ message: 'Project not found' });
-    }
+    } else { res.status(404).json({ message: 'Project not found' }); }
   } catch (error: any) {
-    if (error.name === 'ValidationError') {
-        return res.status(400).json({ message: 'Validation Error', errors: error.errors });
-    }
+    if (error.name === 'ValidationError') return res.status(400).json({ message: 'Validation Error', errors: error.errors });
     res.status(500).json({ message: 'Server Error' });
   }
 };
 
-// @desc    Delete a project
-// @route   DELETE /api/projects/:id
-// @access  Private (Admin)
+// DELETE a project
 export const deleteProject = async (req: Request, res: Response) => {
-    try {
-        const project = await Project.findById(req.params.id);
-        if (project) {
-            await project.deleteOne();
-            res.json({ message: 'Project removed' });
-        } else {
-            res.status(404).json({ message: 'Project not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
-    }
+  try {
+    const project = await Project.findById(req.params.id);
+    if (project) { await project.deleteOne(); res.json({ message: 'Project removed' }); } else { res.status(404).json({ message: 'Project not found' }); }
+  } catch (error) { res.status(500).json({ message: 'Server Error' }); }
+};
+
+// REORDER projects
+export const reorderProjects = async (req: Request, res: Response) => {
+  const { orderedIds } = req.body;
+  try {
+    const bulkOps = orderedIds.map((id: string, index: number) => ({
+      updateOne: { filter: { _id: id }, update: { $set: { displayOrder: index } } },
+    }));
+    await Project.bulkWrite(bulkOps);
+    res.status(200).json({ message: 'Projects reordered successfully' });
+  } catch (error) { res.status(500).json({ message: 'Server Error' }); }
 };

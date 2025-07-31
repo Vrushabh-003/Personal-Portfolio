@@ -17,6 +17,7 @@ const ExperienceSchema: Schema = new Schema({
   startDate: { type: Date, required: true },
   endDate: { type: Date }, // Optional: for current jobs
   description: [{ type: String, required: true }],
+  displayOrder: { type: Number, default: 0 },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 export default mongoose.model<IExperience>('Experience', ExperienceSchema);

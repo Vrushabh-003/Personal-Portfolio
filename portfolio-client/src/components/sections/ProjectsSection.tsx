@@ -12,28 +12,41 @@ const ProjectsSection = () => {
     const { ref, inView } = useInView({ rootMargin: "-50% 0px -50% 0px" });
     const { setActiveSection } = useActiveSection();
     const [projects, setProjects] = useState<Project[]>([]);
+    const [page, setPage] = useState(1);
+    const [pages, setPages] = useState(1);
     const [loading, setLoading] = useState(true);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
     useEffect(() => {
         if (inView) setActiveSection('projects');
     }, [inView, setActiveSection]);
 
+    const fetchProjects = async (pageNum: number) => {
+        setLoading(true);
+        try {
+            const { data } = await axios.get(`${apiBaseUrl}/api/projects?page=${pageNum}`);
+            // Correctly handle the paginated response
+            setProjects(prev => pageNum === 1 ? data.projects : [...prev, ...data.projects]);
+            setPage(data.page);
+            setPages(data.pages);
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchProjects = async () => {
-            try {
-                // Use the environment variable for the API URL
-                const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/projects`;
-                const { data } = await axios.get(apiUrl);
-                setProjects(data);
-            } catch (error) {
-                console.error("Error fetching projects:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProjects();
+        fetchProjects(1); // Fetch the first page on component mount
     }, []);
+
+    const loadMoreHandler = () => {
+        if (page < pages) {
+            fetchProjects(page + 1);
+        }
+    };
 
     // --- Global Spotlight Logic ---
     const [isHovered, setIsHovered] = useState(false);
@@ -66,29 +79,34 @@ const ProjectsSection = () => {
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
-                {/* The Global Spotlight Div */}
                 <motion.div
-                    className="pointer-events-none fixed -inset-px" // Use fixed to cover the whole screen
+                    className="pointer-events-none fixed -inset-px"
                     style={{ background: spotlight }}
                     animate={{ opacity: isHovered ? 1 : 0 }}
                     transition={{ duration: 0.3 }}
                 />
 
                 <h2 className="text-4xl font-bold text-center mb-12">My Work & Projects</h2>
-                {loading ? (
-                    <p className="text-center">Loading Projects...</p>
-                ) : (
-                    <div
-                        className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                        style={{ perspective: "1000px" }}
-                    >
-                        {projects.map((project) => (
-                            <ProjectCard 
-                                key={project._id} 
-                                project={project}
-                                onClick={() => setSelectedProject(project)}
-                            />
-                        ))}
+                
+                <div
+                    className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    style={{ perspective: "1000px" }}
+                >
+                    {projects.map((project) => (
+                        <ProjectCard 
+                            key={project._id} 
+                            project={project}
+                            onClick={() => setSelectedProject(project)}
+                        />
+                    ))}
+                </div>
+
+                {/* "Load More" button appears if there are more pages */}
+                {page < pages && (
+                    <div className="text-center mt-12">
+                        <button onClick={loadMoreHandler} disabled={loading} className="py-3 px-6 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary/90 disabled:opacity-50">
+                            {loading ? 'Loading...' : 'Load More'}
+                        </button>
                     </div>
                 )}
             </section>

@@ -12,6 +12,7 @@ const BlogSchema: Schema = new Schema({
   content: { type: String, required: true },
   imageUrl: { type: String },
   slug: { type: String, required: true, unique: true },
+  displayOrder: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export default mongoose.model<IBlog>('Blog', BlogSchema);
