@@ -67,6 +67,7 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ cursorSize = 20 }) => {
   const trailerScale = useSpring(1, { stiffness: 200, damping: 20 });
   const mouseScale = useSpring(1, { stiffness: 500, damping: 40 });
 
+  // Handle mouse events (desktop)
   useEffect(() => {
     if (isTouchDevice) return;
 
@@ -123,6 +124,33 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ cursorSize = 20 }) => {
     };
   }, [cursorSize, prefersReducedMotion, isTouchDevice]);
 
+  // Handle tap sparks (mobile)
+  useEffect(() => {
+    if (!isTouchDevice) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (prefersReducedMotion) return;
+      const touch = e.touches[0];
+      const colors = ['#007BFF', '#FF4081', '#FFC107', '#4CAF50'];
+
+      const newSparks = Array.from({ length: 10 }).map((_, i) => ({
+        x: touch.clientX,
+        y: touch.clientY,
+        id: Date.now() + i,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      }));
+
+      setSparks((prev) => [...prev, ...newSparks]);
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, [prefersReducedMotion, isTouchDevice]);
+
+  // Update cursor size/scale when hovering over interactive elements
   useEffect(() => {
     if (isHoveringInteractive) {
       trailerScale.set(1.5);
@@ -137,38 +165,41 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ cursorSize = 20 }) => {
     setSparks((prev) => prev.filter((s) => s.id !== id));
   };
 
-  if (isTouchDevice) return null;
-
   return (
     <div className="custom-cursor-container pointer-events-none fixed inset-0 z-[9999]">
-      {/* The trailing dot */}
-      <motion.div
-        style={{
-          left: trailer.x,
-          top: trailer.y,
-          scale: trailerScale,
-        }}
-        className={`rounded-full absolute shadow-md ${
-          cursorType === 'text'
-            ? 'bg-purple-400/50 h-6 w-6'
-            : 'bg-primary/50 h-5 w-5'
-        } border border-gray-300 dark:border-gray-700`}
-      />
-      {/* The main cursor dot */}
-      <motion.div
-        style={{
-          left: mouse.x,
-          top: mouse.y,
-          scale: mouseScale,
-        }}
-        className={`rounded-full absolute shadow-lg ${
-          cursorType === 'text'
-            ? 'bg-purple-600 h-3 w-3'
-            : 'bg-primary h-5 w-5'
-        } border border-white dark:border-gray-900`}
-      />
+      {/* Show cursor only on desktop */}
+      {!isTouchDevice && (
+        <>
+          {/* Trailing dot */}
+          <motion.div
+            style={{
+              left: trailer.x,
+              top: trailer.y,
+              scale: trailerScale,
+            }}
+            className={`rounded-full absolute shadow-md ${
+              cursorType === 'text'
+                ? 'bg-purple-400/50 h-6 w-6'
+                : 'bg-primary/50 h-5 w-5'
+            } border border-gray-300 dark:border-gray-700`}
+          />
+          {/* Main cursor dot */}
+          <motion.div
+            style={{
+              left: mouse.x,
+              top: mouse.y,
+              scale: mouseScale,
+            }}
+            className={`rounded-full absolute shadow-lg ${
+              cursorType === 'text'
+                ? 'bg-purple-600 h-3 w-3'
+                : 'bg-primary h-5 w-5'
+            } border border-white dark:border-gray-900`}
+          />
+        </>
+      )}
 
-      {/* Render the sparks */}
+      {/* Sparks (works on both desktop and mobile) */}
       <AnimatePresence>
         {!prefersReducedMotion &&
           sparks.map((spark) => (
