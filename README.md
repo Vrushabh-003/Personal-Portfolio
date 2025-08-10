@@ -1,11 +1,10 @@
-
 # Vrushabh Shirke - Full-Stack Developer Portfolio
 
-![Portfolio Screenshot](https://via.placeholder.com/1200x600.png?text=Your+Portfolio+Screenshot+Here)
-**Live Demo:** [**[YOUR LIVE DEMO URL HERE]**](vrushabhshirke.netlify.app)
+![Portfolio Screenshot](https://res.cloudinary.com/dqfqipzk6/image/upload/v1754846965/portfolio_uli8rr.png)
+
+**Live Demo:** [**vrushabhshirke.netlify.app**](https://vrushabhshirke.netlify.app)
 
 This repository contains the source code for my personal portfolio website. It is a full-stack application built from scratch, featuring a modern, animated frontend and a complete backend with its own Content Management System (CMS).
-
 
 ---
 
@@ -24,6 +23,7 @@ This repository contains the source code for my personal portfolio website. It i
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 ![React](https://img.shields.io/badge/react-%2320232A.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
@@ -31,6 +31,7 @@ This repository contains the source code for my personal portfolio website. It i
 ![Framer Motion](https://img.shields.io/badge/framer--motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
 
 ### Backend
+
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
@@ -43,6 +44,7 @@ This repository contains the source code for my personal portfolio website. It i
 To run this project locally, follow these steps:
 
 ### Prerequisites
+
 - Node.js (v18 or later)
 - npm
 - A MongoDB Atlas account
@@ -84,13 +86,14 @@ npm run dev
 
 The application will be running on `http://localhost:5173`.
 
------
+---
 
 ## Contact
 
-  - **[Vrushabh Shirke](https://in.linkedin.com/in/vrushabhshirke)**
+- **[Vrushabh Shirke](https://in.linkedin.com/in/vrushabhshirke)**
 
 <!-- end list -->
 
 ```
 
+```
