@@ -50,7 +50,8 @@ const HomePage = () => {
 
   return (
     <ActiveSectionProvider>
-      <div className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text transition-colors duration-500">
+      <div className="bg-light-bg dark:bg-dark-bg text-light-text dark:text-dark-text transition-colors duration-500 px-4 sm:px-0">
+
         <Helmet>
           <title>Vrushabh Shirke</title>
           <meta name="description" content="The personal portfolio of Vrushabh Shirke, showcasing projects in web development, AI, and data science." />
