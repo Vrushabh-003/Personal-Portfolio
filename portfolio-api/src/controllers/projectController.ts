@@ -2,18 +2,25 @@
 import { Request, Response } from 'express';
 import Project from '../models/Project';
 
-// GET all projects with pagination and sorting by displayOrder
+// GET all projects. Supports pagination, but returns ALL projects by default if no limit is set.
 export const getProjects = async (req: Request, res: Response) => {
-  const limit = parseInt(req.query.limit as string) || 6;
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : 0; // Default to 0 (no limit)
   const page = parseInt(req.query.page as string) || 1;
+  
   try {
     const count = await Project.countDocuments();
-    const projects = await Project.find()
-      .sort({ displayOrder: 1 })
-      .limit(limit)
-      .skip(limit * (page - 1));
-    res.json({ projects, page, pages: Math.ceil(count / limit) });
-  } catch (error) { res.status(500).json({ message: 'Server Error' }); }
+    let query = Project.find().sort({ displayOrder: 1 });
+
+    // THE FIX: Only apply limit and skip if a limit is provided in the query
+    if (limit > 0) {
+      query = query.limit(limit).skip(limit * (page - 1));
+    }
+
+    const projects = await query;
+    res.json({ projects, page, pages: limit > 0 ? Math.ceil(count / limit) : 1 });
+  } catch (error) { 
+    res.status(500).json({ message: 'Server Error' }); 
+  }
 };
 
 // GET all projects for admin, sorted by displayOrder

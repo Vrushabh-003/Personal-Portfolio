@@ -1,119 +1,160 @@
 // src/components/sections/ProjectsSection.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import axios from 'axios';
-import { motion, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useActiveSection } from '../../contexts/ActiveSectionContext';
 import ProjectCard from '../common/ProjectCard';
 import { Project } from '../../types';
 import ProjectModal from '../common/ProjectModal';
+import ProjectCardSkeleton from '../skeletons/ProjectCardSkeleton';
 
 const ProjectsSection = () => {
   const { ref: sectionRef, inView } = useInView({ rootMargin: "-50% 0px -50% 0px" });
-  const { ref: loadMoreRef, inView: isLoadMoreVisible } = useInView({ triggerOnce: false });
   const { setActiveSection } = useActiveSection();
 
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [page, setPage] = useState(1);
-  const [pages, setPages] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   useEffect(() => {
-    if (inView) setActiveSection('projects');
-  }, [inView]);
-
-  const fetchProjects = async (pageNum: number) => {
-    setLoading(true);
-    try {
-      const { data } = await axios.get(`${apiBaseUrl}/api/projects?page=${pageNum}&limit=3`);
-      setProjects((prev) => pageNum === 1 ? data.projects : [...prev, ...data.projects]);
-      setPage(data.page);
-      setPages(data.pages);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProjects(1); // First load
+    const updateDeviceType = () => {
+      setIsMobile(window.innerWidth < 640);
+      setIsTablet(window.innerWidth >= 640 && window.innerWidth < 1024);
+    };
+    updateDeviceType();
+    window.addEventListener("resize", updateDeviceType);
+    return () => window.removeEventListener("resize", updateDeviceType);
   }, []);
 
-  // Scroll trigger to load more
+  const projectsPerPage = isMobile ? 1 : isTablet ? 2 : 3;
+  const numPages = allProjects.length > 0 ? Math.ceil(allProjects.length / projectsPerPage) : 0;
+
+  useEffect(() => { if (inView) setActiveSection("projects"); }, [inView, setActiveSection]);
+
   useEffect(() => {
-    if (isLoadMoreVisible && page < pages && !loading) {
-      fetchProjects(page + 1);
+    const fetchAllProjects = async () => {
+      setLoading(true);
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/projects");
+        setAllProjects(Array.isArray(data.projects) ? data.projects : Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAllProjects();
+  }, []);
+
+  const changePage = useCallback((newDirection: number) => {
+    if (numPages <= 1) return;
+    setDirection(newDirection);
+    setCurrentIndex(prev => (prev + newDirection + numPages) % numPages);
+  }, [numPages]);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef(0);
+  const isScrolling = useRef(false);
+
+  useEffect(() => {
+    if (!inView) {
+      setCurrentIndex(0);
     }
-  }, [isLoadMoreVisible]);
+  }, [inView]);
 
-  // --- Global Spotlight Logic ---
-  const [isHovered, setIsHovered] = useState(false);
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { stiffness: 400, damping: 30 };
-  const mouseXSpring = useSpring(mouseX, springConfig);
-  const mouseYSpring = useSpring(mouseY, springConfig);
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY < 0 && currentIndex === 0) return;
+      if (e.deltaY > 0 && currentIndex === numPages - 1) return;
+      e.preventDefault();
+      if (isScrolling.current) return;
+      isScrolling.current = true;
+      if (e.deltaY > 20) changePage(1);
+      else if (e.deltaY < -20) changePage(-1);
+      setTimeout(() => { isScrolling.current = false; }, 800);
+    };
+    const currentRef = scrollRef.current;
+    if (currentRef && !isMobile && !isTablet) {
+      currentRef.addEventListener("wheel", handleWheel, { passive: false });
+    }
+    return () => {
+      if (currentRef && !isMobile && !isTablet) {
+        currentRef.removeEventListener("wheel", handleWheel);
+      }
+    };
+  }, [isMobile, isTablet, changePage, currentIndex, numPages]);
 
-  const spotlight = useMotionTemplate`
-    radial-gradient(
-      circle at ${mouseXSpring}px ${mouseYSpring}px,
-      rgba(0, 123, 255, 0.15),
-      transparent 30%
-    )
-  `;
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const swipeDistance = touchStartX.current - touchEndX;
+    if (swipeDistance > 50) changePage(1);
+    else if (swipeDistance < -50) changePage(-1);
+  };
+  
+  const visibleProjects = allProjects.slice(currentIndex * projectsPerPage, (currentIndex + 1) * projectsPerPage);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    mouseX.set(e.clientX);
-    mouseY.set(e.clientY);
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
   };
 
   return (
     <>
-      <section
-        ref={sectionRef}
-        id="projects"
-        className="py-20 relative"
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <motion.div
-          className="pointer-events-none fixed -inset-px"
-          style={{ background: spotlight }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-        />
+      <section ref={sectionRef} id="projects" className="py-20 relative flex flex-col justify-center min-h-[90vh] overflow-hidden">
+        <h2 className="text-4xl font-bold text-center mb-12 w-full px-4">My Work & Projects</h2>
 
-        <h2 className="text-4xl font-bold text-center mb-12">My Work & Projects</h2>
-
-        <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, index) => (
+        <div
+          ref={scrollRef}
+          className="container mx-auto flex-grow flex items-center justify-center pt-8"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {loading ? (
+            <div className={`grid grid-cols-1 ${isTablet ? "sm:grid-cols-2" : "md:grid-cols-3"} gap-8 w-full px-4`}>
+              <ProjectCardSkeleton />
+              {projectsPerPage > 1 && <ProjectCardSkeleton />}
+              {projectsPerPage > 2 && <ProjectCardSkeleton />}
+            </div>
+          ) : (
             <motion.div
-              key={project._id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
+              key={currentIndex}
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible" // <-- THE FIX IS HERE
+              viewport={{ once: false, amount: 0.2 }} // <-- And here
+              className={`w-full grid grid-cols-1 ${isTablet ? "sm:grid-cols-2" : "lg:grid-cols-3"} gap-8 px-4`}
             >
-              <ProjectCard
-                project={project}
-                onClick={() => setSelectedProject(project)}
-              />
+              {visibleProjects.map((project) => (
+                <motion.div key={project._id} variants={cardVariants}>
+                  <ProjectCard project={project} onClick={() => setSelectedProject(project)} />
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
+          )}
         </div>
 
-        {/* Sentinel div for scroll-based loading */}
-        {page < pages && (
-          <div ref={loadMoreRef} className="h-16 mt-12 flex items-center justify-center">
-            {loading && (
-              <span className="text-gray-500 text-sm animate-pulse">Loading more...</span>
-            )}
-          </div>
-        )}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
+          {Array.from({ length: numPages }).map((_, i) => (
+            <button key={i} onClick={() => setCurrentIndex(i)} className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${currentIndex === i ? "bg-primary scale-125" : "bg-gray-400"}`} />
+          ))}
+        </div>
       </section>
 
       <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />

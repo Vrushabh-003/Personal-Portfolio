@@ -6,18 +6,17 @@ import { useInView } from 'react-intersection-observer';
 import { useActiveSection } from '../../contexts/ActiveSectionContext';
 import { Achievement } from '../../types';
 import { FaTrophy } from 'react-icons/fa';
+import AchievementCardSkeleton from '../skeletons/AchievementCardSkeleton'; // Import the skeleton component
 
 const AchievementItem = ({ item, index }: { item: Achievement, index: number }) => {
   const ref = useRef<HTMLDivElement>(null);
   
-  // --- Parallax Logic ---
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"]
   });
   const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
 
-  // --- Animated Border Logic (triggers on scroll) ---
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -42,16 +41,14 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
       variants={containerVariants}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: false, amount: 0.3 }}
+      viewport={{ once: false, amount: 0.3 }} // Changed once to true for re-animation on scroll
     >
-      {/* Animated Border Lines */}
       <motion.div className="absolute top-0 left-0 w-full h-px bg-primary" style={{ originX: 0 }} variants={lineVariants} />
       <motion.div className="absolute bottom-0 right-0 w-full h-px bg-primary" style={{ originX: 1 }} variants={lineVariants} />
       <motion.div className="absolute top-0 left-0 w-px h-full bg-primary" style={{ originY: 0 }} variants={vLineVariants} />
       <motion.div className="absolute bottom-0 right-0 w-px h-full bg-primary" style={{ originY: 1 }} variants={vLineVariants} />
 
       <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-        {/* Image Column */}
         <div className={`flex justify-center overflow-hidden rounded-lg shadow-lg ${index % 2 !== 0 ? 'md:order-last' : ''}`}>
           {item.imageUrl ? (
            <motion.img 
@@ -73,7 +70,6 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
           )}
         </div>
         
-        {/* Text Column */}
         <div className="text-center md:text-left">
           <p className="text-primary font-semibold mb-2">
             {new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
@@ -92,32 +88,45 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
 const AchievementsSection = () => {
   const { ref, inView } = useInView({ rootMargin: "-50% 0px -50% 0px" });
   const { setActiveSection } = useActiveSection();
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [loading, setLoading] = useState(true); // Add loading state
 
   useEffect(() => {
     if (inView) setActiveSection('achievements');
   }, [inView, setActiveSection]);
 
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-
   useEffect(() => {
     const fetchAchievements = async () => {
-      // Use the environment variable for the API URL
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/achievements`;
-      const { data } = await axios.get(apiUrl);
-      setAchievements(data);
+      setLoading(true); // Set loading to true before fetching
+      try {
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/achievements`;
+        const { data } = await axios.get(apiUrl);
+        setAchievements(data);
+      } catch (error) {
+        console.error("Failed to fetch achievements", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
     };
     fetchAchievements();
   }, []);
-
-  if (achievements.length === 0) return null;
 
   return (
     <section ref={ref} id="achievements" className="py-20">
       <h2 className="text-4xl font-bold text-center mb-16">Awards & Achievements</h2>
       <div className="container mx-auto max-w-5xl space-y-16">
-        {achievements.map((item, index) => (
-          <AchievementItem key={item._id} item={item} index={index} />
-        ))}
+        {loading ? (
+          // Show skeletons while loading
+          <>
+            <AchievementCardSkeleton />
+            <AchievementCardSkeleton />
+          </>
+        ) : (
+          // Show actual data once loaded
+          achievements.map((item, index) => (
+            <AchievementItem key={item._id} item={item} index={index} />
+          ))
+        )}
       </div>
     </section>
   );
