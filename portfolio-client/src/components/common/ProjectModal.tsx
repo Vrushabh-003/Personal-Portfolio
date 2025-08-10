@@ -91,7 +91,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
                   </span>
                 ))}
               </div>
-              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{project.description}</p>
+              {/* <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{project.description}</p> */}
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">{project.description}</p>
               <div className="mt-6 flex gap-4">
                 {project.liveUrl && project.liveUrl !== '#' && 
                   <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 py-2 px-4 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-primary/90">
