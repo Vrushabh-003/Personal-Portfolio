@@ -37,30 +37,29 @@ const ProjectsSection = () => {
 
   useEffect(() => { if (inView) setActiveSection("projects"); }, [inView, setActiveSection]);
 
+  // This useEffect now correctly resets the index when the section is out of view
+  useEffect(() => {
+    if (!inView) {
+      // Add a small delay to prevent abrupt changes while scrolling away
+      const timer = setTimeout(() => setCurrentIndex(0), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [inView]);
+
   useEffect(() => {
     const fetchAllProjects = async () => {
       setLoading(true);
       try {
-        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/projects`;
-        const { data } = await axios.get(apiUrl);
-        
-        setAllProjects(
-          Array.isArray(data.projects)
-            ? data.projects
-            : Array.isArray(data)
-            ? data
-            : []
-        );
+        const { data } = await axios.get("http://localhost:5000/api/projects");
+        setAllProjects(Array.isArray(data.projects) ? data.projects : Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchAllProjects();
   }, []);
-
 
   const changePage = useCallback((newDirection: number) => {
     if (numPages <= 1) return;
@@ -73,32 +72,25 @@ const ProjectsSection = () => {
   const isScrolling = useRef(false);
 
   useEffect(() => {
-    if (!inView) {
-      setCurrentIndex(0);
-    }
-  }, [inView]);
-
-  useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      if (e.deltaY < 0 && currentIndex === 0) return;
-      if (e.deltaY > 0 && currentIndex === numPages - 1) return;
+      if (!inView || isMobile || isTablet) return;
+      const isAtFirstPage = currentIndex === 0 && e.deltaY < 0;
+      const isAtLastPage = currentIndex === numPages - 1 && e.deltaY > 0;
+      if (isAtFirstPage || isAtLastPage) return;
+
       e.preventDefault();
       if (isScrolling.current) return;
+      
       isScrolling.current = true;
-      if (e.deltaY > 20) changePage(1);
-      else if (e.deltaY < -20) changePage(-1);
-      setTimeout(() => { isScrolling.current = false; }, 800);
+      if (e.deltaY > 0) changePage(1);
+      else if (e.deltaY < 0) changePage(-1);
+
+      setTimeout(() => { isScrolling.current = false; }, 600);
     };
-    const currentRef = scrollRef.current;
-    if (currentRef && !isMobile && !isTablet) {
-      currentRef.addEventListener("wheel", handleWheel, { passive: false });
-    }
-    return () => {
-      if (currentRef && !isMobile && !isTablet) {
-        currentRef.removeEventListener("wheel", handleWheel);
-      }
-    };
-  }, [isMobile, isTablet, changePage, currentIndex, numPages]);
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [inView, isMobile, isTablet, changePage, currentIndex, numPages]);
 
   const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
   const handleTouchEnd = (e: React.TouchEvent) => {
@@ -114,9 +106,7 @@ const ProjectsSection = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-      },
+      transition: { staggerChildren: 0.15 },
     },
   };
 
@@ -143,20 +133,22 @@ const ProjectsSection = () => {
               {projectsPerPage > 2 && <ProjectCardSkeleton />}
             </div>
           ) : (
-            <motion.div
-              key={currentIndex}
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible" // <-- THE FIX IS HERE
-              viewport={{ once: false, amount: 0.2 }} // <-- And here
-              className={`w-full grid grid-cols-1 ${isTablet ? "sm:grid-cols-2" : "lg:grid-cols-3"} gap-8 px-4`}
-            >
-              {visibleProjects.map((project) => (
-                <motion.div key={project._id} variants={cardVariants}>
-                  <ProjectCard project={project} onClick={() => setSelectedProject(project)} />
-                </motion.div>
-              ))}
-            </motion.div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                variants={containerVariants}
+                initial="hidden"
+                animate={inView ? "visible" : "hidden"} // Animate based on inView state
+                transition={{ duration: 0.5 }}
+                className={`w-full grid grid-cols-1 ${isTablet ? "sm:grid-cols-2" : "lg:grid-cols-3"} gap-8 px-4`}
+              >
+                {visibleProjects.map((project) => (
+                  <motion.div key={project._id} variants={cardVariants}>
+                    <ProjectCard project={project} onClick={() => setSelectedProject(project)} />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           )}
         </div>
 
