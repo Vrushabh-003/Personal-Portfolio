@@ -1,4 +1,4 @@
-// src/controllers/experienceController.ts
+// portfolio-api/src/controllers/experienceController.ts
 import { Request, Response } from 'express';
 import Experience from '../models/Experience';
 
@@ -19,12 +19,18 @@ export const getExperienceById = async (req: Request, res: Response) => {
   } catch (error) { res.status(500).json({ message: 'Server Error' }); }
 };
 
-// CREATE a new experience, setting initial displayOrder
+// CREATE a new experience
 export const createExperience = async (req: Request, res: Response) => {
   try {
+    const { description, ...rest } = req.body;
+    // THE FIX: Split the incoming description string into an array
+    const experienceData = {
+      ...rest,
+      description: description.split('\n').filter((line: string) => line.trim() !== '')
+    };
     const count = await Experience.countDocuments();
     const newExperience = new Experience({
-      ...req.body,
+      ...experienceData,
       displayOrder: count
     });
     const savedExperience = await newExperience.save();
@@ -37,7 +43,13 @@ export const updateExperience = async (req: Request, res: Response) => {
   try {
     const experience = await Experience.findById(req.params.id);
     if (experience) {
-      Object.assign(experience, req.body);
+      const { description, ...rest } = req.body;
+      // THE FIX: Also split the description string on update
+      const experienceData = {
+        ...rest,
+        description: description.split('\n').filter((line: string) => line.trim() !== '')
+      };
+      Object.assign(experience, experienceData);
       const updatedExperience = await experience.save();
       res.json(updatedExperience);
     } else {

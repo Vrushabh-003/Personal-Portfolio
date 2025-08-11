@@ -75,7 +75,7 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
             {new Date(item.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
           </p>
           <h3 className="text-3xl font-bold mb-4">{item.title}</h3>
-          <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
             {item.description}
           </p>
         </div>
