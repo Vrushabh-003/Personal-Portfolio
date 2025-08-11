@@ -49,17 +49,28 @@ const ProjectsSection = () => {
   useEffect(() => {
     const fetchAllProjects = async () => {
       setLoading(true);
+
       try {
-        const { data } = await axios.get("http://localhost:5000/api/projects");
-        setAllProjects(Array.isArray(data.projects) ? data.projects : Array.isArray(data) ? data : []);
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/projects`;
+        const { data } = await axios.get(apiUrl);
+
+        const projects = Array.isArray(data?.projects)
+          ? data.projects
+          : Array.isArray(data)
+          ? data
+          : [];
+
+        setAllProjects(projects);
       } catch (error) {
         console.error("Error fetching projects:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchAllProjects();
   }, []);
+
 
   const changePage = useCallback((newDirection: number) => {
     if (numPages <= 1) return;
