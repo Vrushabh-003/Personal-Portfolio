@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const ExperienceEditPage = () => {
   const { id } = useParams();
@@ -36,22 +37,41 @@ const ExperienceEditPage = () => {
     }
   }, [id, isNew, apiBaseUrl]);
 
-  const submitHandler = async (e: React.FormEvent) => {
+  // const submitHandler = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const experienceData = { title, company, location, startDate, endDate: endDate || null, description: description.split('\n') };
+  //   const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
+  //   try {
+  //     if (isNew) {
+  //       // Use the environment variable for the API URL
+  //       await axios.post(`${apiBaseUrl}/api/experiences`, experienceData, config);
+  //     } else {
+  //       // Use the environment variable for the API URL
+  //       await axios.put(`${apiBaseUrl}/api/experiences/${id}`, experienceData, config);
+  //     }
+  //     navigate('/admin/dashboard');
+  //   } catch (error) {
+  //     alert('Failed to save experience');
+  //   }
+  // };
+
+    const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    const experienceData = { title, company, location, startDate, endDate: endDate || null, description: description.split('\n') };
+    const experienceData = { title, company, location, startDate, endDate: endDate || null, description: description };
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
-    try {
-      if (isNew) {
-        // Use the environment variable for the API URL
-        await axios.post(`${apiBaseUrl}/api/experiences`, experienceData, config);
-      } else {
-        // Use the environment variable for the API URL
-        await axios.put(`${apiBaseUrl}/api/experiences/${id}`, experienceData, config);
-      }
-      navigate('/admin/dashboard');
-    } catch (error) {
-      alert('Failed to save experience');
-    }
+    
+    const promise = isNew
+        ? axios.post(`${apiBaseUrl}/api/experiences`, experienceData, config)
+        : axios.put(`${apiBaseUrl}/api/experiences/${id}`, experienceData, config);
+
+    toast.promise(promise, {
+        loading: 'Saving experience...',
+        success: () => {
+            navigate('/admin/dashboard');
+            return <b>Experience saved!</b>;
+        },
+        error: <b>Failed to save experience.</b>
+    });
   };
 
   return (

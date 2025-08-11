@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast'; // Import toast
 
 const AchievementEditPage = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const AchievementEditPage = () => {
           const { data } = await axios.get(`${apiBaseUrl}/api/achievements/${id}`);
           setTitle(data.title);
           setDescription(data.description);
-          setDate(new Date(data.date).toISOString().split('T')[0]); // Format date for input
+          setDate(new Date(data.date).toISOString().split('T')[0]);
           setImageUrl(data.imageUrl || '');
         } catch (error) {
           console.error('Failed to fetch achievement', error);
@@ -39,17 +40,18 @@ const AchievementEditPage = () => {
     const achievementData = { title, description, date, imageUrl };
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
 
-    try {
-      if (isNew) {
-        await axios.post(`${apiBaseUrl}/api/achievements`, achievementData, config);
-      } else {
-        await axios.put(`${apiBaseUrl}/api/achievements/${id}`, achievementData, config);
-      }
-      navigate('/admin/dashboard');
-    } catch (error) {
-      console.error('Failed to save achievement', error);
-      alert('Failed to save achievement');
-    }
+    const promise = isNew
+        ? axios.post(`${apiBaseUrl}/api/achievements`, achievementData, config)
+        : axios.put(`${apiBaseUrl}/api/achievements/${id}`, achievementData, config);
+        
+    toast.promise(promise, {
+        loading: 'Saving achievement...',
+        success: () => {
+            navigate('/admin/dashboard');
+            return <b>Achievement saved!</b>;
+        },
+        error: <b>Failed to save achievement.</b>
+    });
   };
 
   return (

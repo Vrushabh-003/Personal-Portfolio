@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import { Media } from '../../types'; // Import the Media type
+import toast from 'react-hot-toast';
 
 const ProjectEditPage = () => {
     const { id } = useParams();
@@ -59,38 +60,59 @@ const ProjectEditPage = () => {
         setMedia(newMedia);
     };
 
+    // const submitHandler = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     const projectData = {
+    //         title,
+    //         description,
+    //         technologies: technologies.split(',').map(tech => tech.trim()),
+    //         liveUrl,
+    //         repoUrl,
+    //         // Filter out any media items where the URL is empty before submitting
+    //         media: media.filter(item => item.url.trim() !== ''),
+    //     };
+        
+    //     const config = {
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             Authorization: `Bearer ${token}`,
+    //         },
+    //     };
+
+    //     try {
+    //         if (isNew) {
+    //             await axios.post(`${apiBaseUrl}/api/projects`, projectData, config);
+    //         } else {
+    //             await axios.put(`${apiBaseUrl}/api/projects/${id}`, projectData, config);
+    //         }
+    //         navigate('/admin/dashboard');
+    //     } catch (error) {
+    //         console.error('Failed to save project', error);
+    //         alert('Failed to save project');
+    //     }
+    // };
+
     const submitHandler = async (e: React.FormEvent) => {
         e.preventDefault();
         const projectData = {
-            title,
-            description,
-            technologies: technologies.split(',').map(tech => tech.trim()),
-            liveUrl,
-            repoUrl,
-            // Filter out any media items where the URL is empty before submitting
-            media: media.filter(item => item.url.trim() !== ''),
+            title, description, technologies: technologies.split(',').map(tech => tech.trim()),
+            liveUrl, repoUrl, media: media.filter(item => item.url.trim() !== ''),
         };
-        
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
+        const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
+
+        const promise = isNew 
+            ? axios.post(`${apiBaseUrl}/api/projects`, projectData, config)
+            : axios.put(`${apiBaseUrl}/api/projects/${id}`, projectData, config);
+
+        toast.promise(promise, {
+            loading: isNew ? 'Creating project...' : 'Updating project...',
+            success: () => {
+                navigate('/admin/dashboard');
+                return <b>Project saved successfully!</b>;
             },
-        };
-
-        try {
-            if (isNew) {
-                await axios.post(`${apiBaseUrl}/api/projects`, projectData, config);
-            } else {
-                await axios.put(`${apiBaseUrl}/api/projects/${id}`, projectData, config);
-            }
-            navigate('/admin/dashboard');
-        } catch (error) {
-            console.error('Failed to save project', error);
-            alert('Failed to save project');
-        }
+            error: <b>Failed to save project.</b>
+        });
     };
-
     return (
         <div className="p-8 bg-gray-100 dark:bg-gray-900 min-h-screen text-gray-900 dark:text-white">
             <div className="container mx-auto max-w-2xl">

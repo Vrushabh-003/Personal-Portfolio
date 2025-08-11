@@ -12,12 +12,22 @@ interface ProjectModalProps {
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Reset the slider to the first image whenever a new project is opened
+  // This is the new useEffect hook to control body scroll
   useEffect(() => {
     if (project) {
-      setCurrentIndex(0);
+      // When the modal opens, disable scrolling on the body
+      document.body.style.overflow = 'hidden';
+      setCurrentIndex(0); // Also reset the slider
+    } else {
+      // When the modal closes, re-enable scrolling
+      document.body.style.overflow = 'unset';
     }
-  }, [project]);
+
+    // Cleanup function to ensure scroll is re-enabled when the component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [project]); // This effect runs whenever the 'project' prop changes
 
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -33,14 +43,14 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   if (!project) return null;
 
   const goToPrevious = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent modal from closing
+    e.stopPropagation();
     const isFirstSlide = currentIndex === 0;
     const newIndex = isFirstSlide ? project.media.length - 1 : currentIndex - 1;
     setCurrentIndex(newIndex);
   };
 
   const goToNext = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent modal from closing
+    e.stopPropagation();
     const isLastSlide = currentIndex === project.media.length - 1;
     const newIndex = isLastSlide ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
@@ -91,7 +101,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
                   </span>
                 ))}
               </div>
-              {/* <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{project.description}</p> */}
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">{project.description}</p>
               <div className="mt-6 flex gap-4">
                 {project.liveUrl && project.liveUrl !== '#' && 

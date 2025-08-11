@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Project, Achievement, Blog, Experience } from '../../types';
+import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
   const { token, logout } = useAuth();
@@ -35,16 +36,47 @@ const AdminDashboard = () => {
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
+  // const createDeleteHandler = (itemType: string, plural: string) => async (id: string) => {
+  //   if (window.confirm(`Are you sure you want to delete this ${itemType}?`)) {
+  //     try {
+  //       const config = { headers: { Authorization: `Bearer ${token}` } };
+  //       await axios.delete(`${apiBaseUrl}/api/${plural}/${id}`, config);
+  //       fetchData();
+  //     } catch (error) { console.error(`Failed to delete ${itemType}`, error); }
+  //   }
+  // };
   const createDeleteHandler = (itemType: string, plural: string) => async (id: string) => {
     if (window.confirm(`Are you sure you want to delete this ${itemType}?`)) {
-      try {
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        await axios.delete(`${apiBaseUrl}/api/${plural}/${id}`, config);
-        fetchData();
-      } catch (error) { console.error(`Failed to delete ${itemType}`, error); }
+      const promise = axios.delete(`${apiBaseUrl}/api/${plural}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      
+      toast.promise(promise, {
+        loading: `Deleting ${itemType}...`,
+        success: () => {
+          fetchData();
+          return <b>{`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted!`}</b>;
+        },
+        error: <b>Could not delete.</b>
+      });
     }
   };
 
+  // const createReorderHandler = (plural: string, items: any[], setItems: Function) => async (index: number, direction: 'up' | 'down') => {
+  //   const newItems = [...items];
+  //   const newIndex = direction === 'up' ? index - 1 : index + 1;
+  //   if (newIndex < 0 || newIndex >= newItems.length) return;
+
+  //   [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
+  //   setItems(newItems);
+
+  //   const orderedIds = newItems.map(item => item._id);
+  //   try {
+  //     const config = { headers: { Authorization: `Bearer ${token}` } };
+  //     await axios.put(`${apiBaseUrl}/api/${plural}/reorder`, { orderedIds }, config);
+  //   } catch (error) {
+  //     console.error(`Failed to reorder ${plural}`, error);
+  //     fetchData(); // Revert on error
+  //   }
+  // };
   const createReorderHandler = (plural: string, items: any[], setItems: Function) => async (index: number, direction: 'up' | 'down') => {
     const newItems = [...items];
     const newIndex = direction === 'up' ? index - 1 : index + 1;
@@ -54,13 +86,16 @@ const AdminDashboard = () => {
     setItems(newItems);
 
     const orderedIds = newItems.map(item => item._id);
-    try {
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.put(`${apiBaseUrl}/api/${plural}/reorder`, { orderedIds }, config);
-    } catch (error) {
-      console.error(`Failed to reorder ${plural}`, error);
-      fetchData(); // Revert on error
-    }
+    const promise = axios.put(`${apiBaseUrl}/api/${plural}/reorder`, { orderedIds }, { headers: { Authorization: `Bearer ${token}` } });
+    
+    toast.promise(promise, {
+        loading: 'Saving order...',
+        success: <b>Order saved!</b>,
+        error: (err) => {
+            fetchData(); // Revert on error
+            return <b>Failed to reorder.</b>;
+        }
+    });
   };
 
   const handleProjectDelete = createDeleteHandler('project', 'projects');

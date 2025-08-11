@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast'; // Import toast
 
 const BlogEditPage = () => {
   const { id } = useParams();
@@ -14,7 +15,6 @@ const BlogEditPage = () => {
   const [imageUrl, setImageUrl] = useState('');
   const isNew = !id;
 
-  // Define the base URL from the environment variable
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -39,17 +39,18 @@ const BlogEditPage = () => {
     const blogData = { title, content, imageUrl };
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
 
-    try {
-      if (isNew) {
-        await axios.post(`${apiBaseUrl}/api/blogs`, blogData, config);
-      } else {
-        await axios.put(`${apiBaseUrl}/api/blogs/${id}`, blogData, config);
-      }
-      navigate('/admin/dashboard');
-    } catch (error) {
-      // In a real app, provide more specific user feedback
-      alert('Failed to save blog post');
-    }
+    const promise = isNew
+      ? axios.post(`${apiBaseUrl}/api/blogs`, blogData, config)
+      : axios.put(`${apiBaseUrl}/api/blogs/${id}`, blogData, config);
+
+    toast.promise(promise, {
+      loading: isNew ? 'Publishing post...' : 'Updating post...',
+      success: () => {
+        navigate('/admin/dashboard');
+        return <b>Post saved successfully!</b>;
+      },
+      error: <b>Failed to save post.</b>
+    });
   };
 
   return (
