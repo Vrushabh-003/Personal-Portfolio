@@ -91,9 +91,3 @@ The application will be running on `http://localhost:5173`.
 ## Contact
 
 - **[Vrushabh Shirke](https://in.linkedin.com/in/vrushabhshirke)**
-
-<!-- end list -->
-
-```
-
-```
