@@ -28,6 +28,7 @@ const AchievementEditPage = () => {
           setDescription(data.description);
           setDate(new Date(data.date).toISOString().split('T')[0]);
           setImageUrl(data.imageUrl || '');
+          setCertificateUrl(data.certificateUrl || '');
         } catch (error) {
           console.error('Failed to fetch achievement', error);
         }
