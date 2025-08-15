@@ -22,6 +22,7 @@ const LeadershipEditPage = () => {
     if (!isNew) {
       const fetchLeadershipRole = async () => {
         try {
+          // You need to be authenticated to fetch a single role
           const { data } = await axios.get(`${apiBaseUrl}/api/leadership/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
           });
@@ -39,7 +40,8 @@ const LeadershipEditPage = () => {
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    const leadershipData = { role, organization, description };
+    // 👇 FIX IS HERE: Add certificateUrl to the object
+    const leadershipData = { role, organization, description, certificateUrl };
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
 
     const promise = isNew

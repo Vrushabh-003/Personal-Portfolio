@@ -38,7 +38,7 @@ const AchievementEditPage = () => {
 
   const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    const achievementData = { title, description, date, imageUrl };
+    const achievementData = { title, description, date, imageUrl, certificateUrl };
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
 
     const promise = isNew
