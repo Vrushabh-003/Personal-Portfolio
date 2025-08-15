@@ -64,7 +64,7 @@ const LeadershipSection = () => {
             <div>
               <h3 className="text-xl font-bold">{role.role}</h3>
               <p className="font-semibold text-primary mb-2">{role.organization}</p>
-              <p className="text-gray-600 dark:text-gray-300">{role.description}</p>
+              <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">{role.description}</p>
               {role.certificateUrl && (
                 <a
                   href={role.certificateUrl}
