@@ -16,15 +16,14 @@ const ExperienceEditPage = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [description, setDescription] = useState('');
+  const [certificateUrl, setCertificateUrl] = useState(''); 
 
   const isNew = !id;
-  // Define the base URL from the environment variable
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     if (!isNew) {
       const fetchExperience = async () => {
-        // Use the environment variable for the API URL
         const { data } = await axios.get(`${apiBaseUrl}/api/experiences/${id}`);
         setTitle(data.title);
         setCompany(data.company);
@@ -32,32 +31,15 @@ const ExperienceEditPage = () => {
         setStartDate(new Date(data.startDate).toISOString().split('T')[0]);
         setEndDate(data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : '');
         setDescription(data.description.join('\n'));
+        setCertificateUrl(data.certificateUrl || ''); 
       };
       fetchExperience();
     }
   }, [id, isNew, apiBaseUrl]);
 
-  // const submitHandler = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   const experienceData = { title, company, location, startDate, endDate: endDate || null, description: description.split('\n') };
-  //   const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
-  //   try {
-  //     if (isNew) {
-  //       // Use the environment variable for the API URL
-  //       await axios.post(`${apiBaseUrl}/api/experiences`, experienceData, config);
-  //     } else {
-  //       // Use the environment variable for the API URL
-  //       await axios.put(`${apiBaseUrl}/api/experiences/${id}`, experienceData, config);
-  //     }
-  //     navigate('/admin/dashboard');
-  //   } catch (error) {
-  //     alert('Failed to save experience');
-  //   }
-  // };
-
-    const submitHandler = async (e: React.FormEvent) => {
+  const submitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    const experienceData = { title, company, location, startDate, endDate: endDate || null, description: description };
+    const experienceData = { title, company, location, startDate, endDate: endDate || null, description: description, certificateUrl };
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
     
     const promise = isNew
@@ -86,6 +68,7 @@ const ExperienceEditPage = () => {
           <input type="date" placeholder="Start Date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           <input type="date" placeholder="End Date (optional)" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           <textarea placeholder="Description (one point per line)" value={description} onChange={e => setDescription(e.target.value)} required className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded" rows={5}></textarea>
+          <input type="text" placeholder="Certificate URL (optional)" value={certificateUrl} onChange={e => setCertificateUrl(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           <button type="submit" className="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">Save</button>
         </form>
       </div>

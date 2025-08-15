@@ -5,7 +5,7 @@
 export interface Media {
   url: string;
   type: 'image' | 'video';
-  _id?: string; // Mongoose might add an _id to subdocuments
+  _id?: string; 
 }
 
 export interface Project {
@@ -27,14 +27,6 @@ export interface Blog {
   createdAt: string;
 }
 
-export interface Achievement {
-  _id:string;
-  title: string;
-  description: string;
-  date: string;
-  imageUrl?: string;
-}
-
 export interface Experience {
   _id: string;
   title: string;
@@ -42,5 +34,23 @@ export interface Experience {
   location: string;
   startDate: string;
   endDate?: string;
-  description: string[] ;
+  description: string[];
+  certificateUrl?: string;
+}
+
+export interface Achievement {
+  _id: string;
+  title: string;
+  description: string;
+  date: string;
+  imageUrl?: string;
+  certificateUrl?: string; 
+}
+
+export interface Leadership {
+  _id: string;
+  role: string;
+  organization: string;
+  description: string;
+  certificateUrl?: string; 
 }

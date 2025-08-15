@@ -5,15 +5,14 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useActiveSection } from '../../contexts/ActiveSectionContext';
 import { FaSun, FaMoon, FaBars, FaTimes } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
-import Logo from '../../assets/logo.svg?react'; 
-import logoSrc from '../../assets/logo.png'; // Import the image source
+import logoSrc from '../../assets/logo.png';
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { activeSection } = useActiveSection();
-  const location = useLocation(); // Get current location
+  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +24,8 @@ const Header = () => {
 
   const navLinks = [
     { href: '/#about', title: 'About', id: 'about' },
-    { href: '/#experience', title: 'Experience', id: 'experience' }, // <-- Added this link
+    { href: '/#leadership', title: 'Leadership', id: 'leadership' },
+    { href: '/#experience', title: 'Experience', id: 'experience' },
     { href: '/#skills', title: 'Skills', id: 'skills' },
     { href: '/#projects', title: 'Projects', id: 'projects' },
     { href: '/#achievements', title: 'Achievements', id: 'achievements' },

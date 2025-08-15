@@ -4,15 +4,15 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useActiveSection } from '../../contexts/ActiveSectionContext';
-import { FaBriefcase } from 'react-icons/fa';
+import { FaBriefcase, FaCertificate } from 'react-icons/fa';
 import { Experience } from '../../types';
-import ExperienceCardSkeleton from '../skeletons/ExperienceCardSkeleton'; // Import the skeleton
+import ExperienceCardSkeleton from '../skeletons/ExperienceCardSkeleton'; 
 
 const ExperienceSection = () => {
   const { ref, inView } = useInView({ rootMargin: "-50% 0px -50% 0px" });
   const { setActiveSection } = useActiveSection();
   const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (inView) setActiveSection('experience');
@@ -20,7 +20,7 @@ const ExperienceSection = () => {
 
   useEffect(() => {
     const fetchExperiences = async () => {
-      setLoading(true); // Set loading to true before fetching
+      setLoading(true); 
       try {
         const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/experiences`;
         const { data } = await axios.get(apiUrl);
@@ -28,7 +28,7 @@ const ExperienceSection = () => {
       } catch(e) { 
         console.error("Failed to fetch experiences", e);
       } finally {
-        setLoading(false); // Set loading to false after fetching is complete
+        setLoading(false); 
       }
     };
     fetchExperiences();
@@ -44,13 +44,12 @@ const ExperienceSection = () => {
           <div className="absolute left-4 md:left-1/2 transform md:-translate-x-1/2 h-full w-0.5 bg-gray-300 dark:bg-gray-700"></div>
           
           {loading ? (
-            // Show skeletons while loading
+            
             <>
               <ExperienceCardSkeleton />
               <ExperienceCardSkeleton />
             </>
           ) : (
-            // Show actual data once loaded
             experiences.map((job, index) => (
               <motion.div 
                 key={job._id}
@@ -70,6 +69,16 @@ const ExperienceSection = () => {
                     <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
                       {job.description.map((point, i) => <li key={i}>{point}</li>)}
                     </ul>
+                    {job.certificateUrl && (
+                      <a
+                        href={job.certificateUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-4 text-primary font-semibold hover:underline"
+                      >
+                        <FaCertificate /> View Certificate
+                      </a>
+                    )}
                   </div>
                   <div className="absolute left-4 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white z-10">
                     <FaBriefcase />

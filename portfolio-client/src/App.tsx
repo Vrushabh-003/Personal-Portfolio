@@ -4,18 +4,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
 
-// import HomePage from './pages/HomePage';
-// import AdminLoginPage from './pages/admin/AdminLoginPage';
-// import AdminDashboard from './pages/admin/AdminDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
-// import ProjectEditPage from './pages/admin/ProjectEditPage';
-// import AchievementEditPage from './pages/admin/AchievementEditPage'; 
 import CustomCursor from './components/common/CustomCursor';
-// import BlogEditPage from './pages/admin/BlogEditPage';
-// import BlogListPage from './pages/BlogListPage';
-// import SinglePostPage from './pages/SinglePostPage';
-// import ExperienceEditPage from './pages/admin/ExperienceEditPage';
-import { ActiveSectionProvider } from './contexts/ActiveSectionContext'
+import { ActiveSectionProvider } from './contexts/ActiveSectionContext';
 
 // Lazy load page components
 const HomePage = React.lazy(() => import('./pages/HomePage'));
@@ -27,6 +18,7 @@ const BlogEditPage = React.lazy(() => import('./pages/admin/BlogEditPage'));
 const BlogListPage = React.lazy(() => import('./pages/BlogListPage'));
 const SinglePostPage = React.lazy(() => import('./pages/SinglePostPage'));
 const ExperienceEditPage = React.lazy(() => import('./pages/admin/ExperienceEditPage'));
+const LeadershipEditPage = React.lazy(() => import('./pages/admin/LeadershipEditPage'));
 
 
 function App() {
@@ -35,18 +27,8 @@ function App() {
       <Toaster 
         position="bottom-right" 
         toastOptions={{
-          success: {
-            style: {
-              background: '#28a745',
-              color: 'white',
-            },
-          },
-          error: {
-            style: {
-              background: '#dc3545',
-              color: 'white',
-            },
-          },
+          success: { style: { background: '#28a745', color: 'white' } },
+          error: { style: { background: '#dc3545', color: 'white' } },
         }}
       />
       <CustomCursor />
@@ -70,7 +52,8 @@ function App() {
               <Route path="/admin/blog/:id" element={<BlogEditPage />} /> 
               <Route path="/admin/experience/new" element={<ExperienceEditPage />} />
               <Route path="/admin/experience/:id" element={<ExperienceEditPage />} />
-              
+              <Route path="/admin/leadership/new" element={<LeadershipEditPage />} />
+              <Route path="/admin/leadership/:id" element={<LeadershipEditPage />} />
             </Route>
           </Routes>
         </ActiveSectionProvider>

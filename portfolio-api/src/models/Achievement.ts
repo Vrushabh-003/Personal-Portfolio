@@ -1,3 +1,4 @@
+// src/models/Achievement.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IAchievement extends Document {
@@ -5,6 +6,7 @@ export interface IAchievement extends Document {
   description: string;
   date: Date;
   imageUrl?: string;
+  certificateUrl?: string; 
 }
 
 const AchievementSchema: Schema = new Schema({
@@ -12,6 +14,7 @@ const AchievementSchema: Schema = new Schema({
   description: { type: String, required: true },
   date: { type: Date, required: true },
   imageUrl: { type: String },
+  certificateUrl: { type: String }, 
   displayOrder: { type: Number, default: 0 },
 }, { timestamps: true });
 

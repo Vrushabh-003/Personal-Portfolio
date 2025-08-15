@@ -7,11 +7,11 @@ import connectDB from './config/db';
 // Import route files
 import projectRoutes from './routes/projectRoutes'; 
 import authRoutes from './routes/authRoutes';
-import blogRoutes from './routes/blogRoutes'; // Placeholder for blog routes
+import blogRoutes from './routes/blogRoutes'; 
 import achievementRoutes from './routes/achievementRoutes'; 
 import contactRoutes from './routes/contactRoutes'; 
 import experienceRoutes from './routes/experienceRoutes';
-// Add imports for blogRoutes and achievementRoutes when you create them
+import leadershipRoutes from './routes/leadershipRoutes';
 
 dotenv.config();
 connectDB();
@@ -21,8 +21,8 @@ const app = express();
 // Use the cors middleware
 
 const allowedOrigins = [
-  'https://vrushabhshirke.netlify.app', // Your live frontend
-  'http://localhost:5173'             // Your local development frontend
+  'https://vrushabhshirke.netlify.app', // live frontend
+  'http://localhost:5173'             // local development frontend
 ];
 
 app.use(cors({
@@ -50,6 +50,7 @@ app.use('/api/blogs', blogRoutes);
 app.use('/api/achievements', achievementRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/experiences', experienceRoutes);
+app.use('/api/leadership', leadershipRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

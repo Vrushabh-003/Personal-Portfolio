@@ -10,13 +10,13 @@ import SkillsSection from '../components/sections/Skillssection';
 import AchievementsSection from '../components/sections/AchievementsSection';
 import ContactSection from '../components/sections/ContactSection';
 import ExperienceSection from '../components/sections/ExperienceSection';
+import LeadershipSection from '../components/sections/LeadershipSection'; // Import new section
 import { ActiveSectionProvider } from '../contexts/ActiveSectionContext';
 
 const HomePage = () => {
   const refinedBio =
     "I'm a final-year Computer Engineering student passionate about building meaningful digital experiences. I specialize in full-stack web and mobile app development, with a growing interest in Data Science, AI/ML, and cloud computing. From AI-powered security systems to Gen Z investment platforms, I thrive on leading and contributing to impactful projects in fast-paced, collaborative environments.";
 
-  // --- UPDATED SKILLS DATA ---
   const categorizedSkills = {
     Frontend: [
       { name: 'React', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
@@ -62,12 +62,10 @@ const HomePage = () => {
 
         <Header />
         <main>
-          {/* Hero section stays full width */}
           <HeroSection name="Vrushabh Deepak Shirke" />
-
-          {/* Rest of sections get mobile padding */}
           <div className="px-4 sm:px-0">
             <AboutSection bio={refinedBio} />
+            <LeadershipSection />
             <ExperienceSection />
             <SkillsSection skills={categorizedSkills} />
             <ProjectsSection />

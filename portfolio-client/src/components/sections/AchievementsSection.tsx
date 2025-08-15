@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useActiveSection } from '../../contexts/ActiveSectionContext';
 import { Achievement } from '../../types';
-import { FaTrophy } from 'react-icons/fa';
+import { FaTrophy, FaCertificate } from 'react-icons/fa';
 import AchievementCardSkeleton from '../skeletons/AchievementCardSkeleton'; // Import the skeleton component
 
 const AchievementItem = ({ item, index }: { item: Achievement, index: number }) => {
@@ -78,6 +78,16 @@ const AchievementItem = ({ item, index }: { item: Achievement, index: number }) 
           <p className="text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
             {item.description}
           </p>
+          {item.certificateUrl && (
+            <a
+              href={item.certificateUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-4 text-primary font-semibold hover:underline"
+            >
+              <FaCertificate /> View Certificate
+            </a>
+          )}
         </div>
       </div>
     </motion.div>

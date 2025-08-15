@@ -14,6 +14,7 @@ const AchievementEditPage = () => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [certificateUrl, setCertificateUrl] = useState('');
 
   const isNew = !id;
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
@@ -74,6 +75,10 @@ const AchievementEditPage = () => {
           <div>
             <label className="block mb-1 font-medium">Image URL (Optional)</label>
             <input type="text" value={imageUrl} onChange={e => setImageUrl(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Certificate URL (Optional)</label>
+            <input type="text" value={certificateUrl} onChange={e => setCertificateUrl(e.target.value)} className="w-full p-2 bg-gray-200 dark:bg-gray-700 rounded"/>
           </div>
           <div className="flex gap-4">
             <button type="submit" className="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
