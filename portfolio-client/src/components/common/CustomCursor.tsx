@@ -55,8 +55,8 @@ const CustomCursor: React.FC<CustomCursorProps> = ({ cursorSize = 20 }) => {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const mouse = {
-    x: useSpring(0, { stiffness: 500, damping: 40 }),
-    y: useSpring(0, { stiffness: 500, damping: 40 }),
+    x: useSpring(0, { stiffness: 1000, damping: 30 }),
+    y: useSpring(0, { stiffness: 1000, damping: 30 }),
   };
 
   const trailer = {
